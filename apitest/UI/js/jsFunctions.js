@@ -138,15 +138,15 @@ function setAPIFunctions() {
     var result = publicClass.call("getFunctionList");    
     if (result.code == 0) {
         $.each(result.data,function(className,functions) {
-            if (functions.length > 0) {
-                list[className] = {};
-                $.each(functions,function(index,functionName) {
-                    var body = "var api = new _API(\""+className+"\");"+
-                        "api.setAjaxOpt(\"async\",false);"+
-                        "return api.call(\""+functionName+"\",data)";
-                    list[className][functionName] = new Function("data",body);
-                });
-            }
+            list[className] = {};
+            
+            $.each(functions,function(index,functionName) {
+                list[className][functionName] = function(data) {
+                    var api = new _API(className);
+                    api.setAjaxOpt("async",false);
+                    return api.call(functionName,data);
+                }
+            });
         });
     }
     
