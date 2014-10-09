@@ -25,7 +25,7 @@
                                 
                 $check = bcsub("10",bcmod($sum,"10"));
                 
-                if (mb_substr($val,-1) == $check) {
+                if (mb_substr($val,-1) == mb_substr($check,-1)) {
                     $result = true;
                 }
             }
