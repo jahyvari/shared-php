@@ -13,18 +13,16 @@
                 $strlen = mb_strlen($val);
                 $multipliers = array(7,3,1);
                 $x = 0;
-                $sum = "0";
+                $sum = 0;
                 
                 for ($i = ($strlen-2); $i >= 0; $i--) {
-                    $sum = bcadd($sum,
-                        (string)(mb_substr($val,$i,1)*$multipliers[$x++])
-                    );
+                    $sum += mb_substr($val,$i,1)*$multipliers[$x++];
                     if ($x == 3) {
                         $x = 0;
                     }
                 }
                 
-                $check = bcsub("10",bcmod($sum,"10"));
+                $check = 10-$sum%10;
                 
                 if (mb_substr($check,-1) == mb_substr($val,-1)) {
                     $result = true;

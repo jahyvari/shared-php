@@ -12,20 +12,18 @@
             if (mb_ereg_match("^[0-9]{2,}$",$val) && ltrim($val,"0")) {
                 $multiplier = 2;
                 $strlen = mb_strlen($val)-1;
-                $sum = "0";
+                $sum = 0;
                 
                 for ($i = 0; $i < $strlen; $i++) {
-                    $sum = bcadd($sum,
-                        (string)array_sum(str_split(mb_substr($val,$i,1)*$multiplier--,1))
-                    );
+                    $sum += array_sum(str_split(mb_substr($val,$i,1)*$multiplier--,1));
                     if ($multiplier == 0) {
                         $multiplier = 2;
                     }
                 }
                                 
-                $check = bcsub("10",bcmod($sum,"10"));
+                $check = 10-$sum%10;
                 
-                if (mb_substr($val,-1) == mb_substr($check,-1)) {
+                if (mb_substr($check,-1) == mb_substr($val,-1)) {
                     $result = true;
                 }
             }
