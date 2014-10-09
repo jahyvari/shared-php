@@ -4,6 +4,37 @@
     
     class CheckDigits {
         /**
+         * Tarkastaa suomalaisen konekielisen BBAN tilinumeron.
+         *
+         * @param   string  $bban   BBAN
+         * @return  bool
+         */
+        public static function checkFIBBAN($bban) {
+            $result = false;
+                        
+            if (mb_ereg_match("^[1-8]{1}[0-9]{7,13}$",$bban)) {
+                $part1 = mb_substr($bban,0,6);
+                $part2 = mb_substr($bban,6);
+                $count = 8-mb_strlen($part2);
+                
+                switch (mb_substr($bban,0,1)) {
+                    case "4":
+                    case "5":
+                        $part2 = mb_substr($part2,0,1).
+                            str_repeat("0",$count).
+                            mb_substr($part2,1);
+                        break;                    
+                    default:
+                        $part2 = str_repeat("0",$count).$part2;
+                }
+                                
+                $result = Modulo::checkLuhnMod10($part1.$part2);
+            }
+            
+            return $result;
+        }
+        
+        /**
          * Tarkastaa suomalaisen Y-tunnuksen.
          *
          * @param   string  $businessid Y-tunnus
@@ -84,9 +115,9 @@
             if (mb_ereg_match("^[0-9]{6}[\+\-A]{1}[0-9]{3}[0-9A-FHJ-NPR-Y]{1}$",$personid)) {
                 $part1 = mb_substr($personid,0,6);
                 $part2 = mb_substr($personid,7,4);
-                $delimeter = mb_substr($personid,6,1);
+                $delimiter = mb_substr($personid,6,1);
                 
-                $date = str_replace(array("+","-","A"),array("18","19","20"),$delimeter).
+                $date = str_replace(array("+","-","A"),array("18","19","20"),$delimiter).
                     implode("-",array_reverse(str_split($part1,2)));
                                 
                 if (DateTime::createFromFormat("Y-m-d",$date)) {
