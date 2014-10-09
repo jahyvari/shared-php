@@ -16,13 +16,36 @@
         );
         
         private $_transactions = array();
-        
+                        
         public function __construct($data = array()) {
+            if (empty($data)) {
+                $data = $this->_getConnData();
+            }
+            
             if (is_array($data)) {
                 foreach ($data as $key => $value) {
                     $this->$key = $value;
                 }
             }
+        }
+        
+        /**
+         * Lukee käyttäjän kotihakemistosta .dbconn tiedostosta yhteysmuuttujat.
+         *
+         * Funktio palauttaa taulukon yhteysmuuttujista tai boolean false jos
+         * tiedostoa ei löydy.
+         *
+         * @return  mixed
+         */
+        private function _getConnData() {
+            $result = false;
+            
+            $file = $_SERVER["HOME"].DIRECTORY_SEPARATOR.".dbconn";
+            if (file_exists($file)) {
+                $result = parse_ini_file($file);
+            }
+            
+            return $result;
         }
         
         public function __get($name) {
