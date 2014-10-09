@@ -1,6 +1,6 @@
 <?php
-    require_once(__DIR__."/classMysqliConn.php");
-    require_once(__DIR__."/classPDOConn.php");
+    require_once(__DIR__.DIRECTORY_SEPARATOR."classMysqliConn.php");
+    require_once(__DIR__.DIRECTORY_SEPARATOR."classPDOConn.php");
     
     class DB {
         private static $_conn = null;
@@ -21,7 +21,7 @@
             return true;
         }
         
-        public static function open($name,$driver,$data = array()) {            
+        public static function open($name,$driver = "mysqli",$data = array()) {
             if (!$name) {
                 throw new Exception("Invalid database connection name $name");
             }

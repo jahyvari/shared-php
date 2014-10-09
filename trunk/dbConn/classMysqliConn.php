@@ -1,5 +1,5 @@
 <?php
-    require_once(__DIR__."/classDbConn.php");
+    require_once(__DIR__.DIRECTORY_SEPARATOR."classDbConn.php");
     
     class MysqliConn extends DbConn {        
         const FETCH_ASSOC   = MYSQLI_ASSOC;
