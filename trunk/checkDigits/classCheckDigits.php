@@ -41,7 +41,7 @@
         }
         
         /**
-         * Tarkastaa suomalaisen viitenumero.
+         * Tarkastaa suomalaisen viitenumeron.
          *
          * @param   string  $reference  Viitenumero
          * @return  bool
