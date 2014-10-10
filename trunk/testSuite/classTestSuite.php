@@ -157,7 +157,7 @@
                     throw new Exception("Sanity check TestSuite()!=(object)1 failed!");
                 }
             } catch (Exception $e) {
-                echo $e->getMessage()."\n";
+                echo $e->getMessage().PHP_EOL;
                 exit(1);
             }
             
@@ -196,16 +196,16 @@
                     $dump2 = var_export($result,true);
                     throw new Exception(<<<END
 Excepted value and returned value do not match!
---------
+---------
 Excepted: $dump1
---------
+---------
 Returned: $dump2
---------
+---------
 END
 );
                 }
             } catch (Exception $e) {
-                echo "Error at test suite $name: ".$e->getMessage()."\n";
+                echo "Error at $name: ".$e->getMessage().PHP_EOL;
                 exit(1);
             }
             
