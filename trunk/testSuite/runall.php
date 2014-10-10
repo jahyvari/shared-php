@@ -5,6 +5,12 @@
         exit(1);
     }
     
+    # PHP polku
+    $php = "php";
+    if (isset($_SERVER["_"])) {
+        $php = $_SERVER["_"];
+    }
+    
     # Suoritetaan kaikki kansion testit
     foreach($glob as $test) {
         $code       = 0;
@@ -12,7 +18,7 @@
         $basename   = basename($test);
         
         echo "Running $basename".str_repeat(".",40-strlen($basename))." ";
-        exec("php $test",$output,$code);
+        exec("$php $test",$output,$code);
         
         # Jotain palautui ruudulle   
         if (!empty($output)) {

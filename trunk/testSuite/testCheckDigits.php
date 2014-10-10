@@ -1,10 +1,10 @@
 <?php        
-    require_once(__DIR__.DIRECTORY_SEPARATOR."config.php");    
+    require_once(__DIR__.DIRECTORY_SEPARATOR."config.php");
     require_once(dirname(__DIR__).
-                 DIRECTORY_SEPARATOR.
-                 "checkDigits".
-                 DIRECTORY_SEPARATOR.
-                 "classCheckDigits.php"
+        DIRECTORY_SEPARATOR.
+        "checkDigits".
+        DIRECTORY_SEPARATOR.
+        "classCheckDigits.php"
     );
     
     # Tarkasta kelvollinen suomalainen BBAN    

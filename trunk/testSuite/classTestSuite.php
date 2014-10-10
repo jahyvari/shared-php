@@ -125,7 +125,7 @@
                 }
                 
                 if (!self::_compare(0.5,"0.5")) {
-                    throw new Exception("Sanity check 0.5==0.5 failed!");
+                    throw new Exception("Sanity check 0.5=='0.5' failed!");
                 }
                 
                 if (self::_compare(0.4,0.39999)) {
