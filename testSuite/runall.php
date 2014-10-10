@@ -1,7 +1,7 @@
 <?php
     $glob = glob(__DIR__.DIRECTORY_SEPARATOR."test*.php");
     if (empty($glob)) { # Ei testitiedostoja
-        echo "No test files!\n";
+        echo "No test files!".PHP_EOL;
         exit(1);
     }
     
