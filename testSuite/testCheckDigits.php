@@ -1,14 +1,11 @@
 <?php        
-    error_reporting(E_ALL);
-    ini_set("display_errors","1");
-
+    require_once(__DIR__.DIRECTORY_SEPARATOR."config.php");    
     require_once(dirname(__DIR__).
                  DIRECTORY_SEPARATOR.
-                 "testSuite".
+                 "checkDigits".
                  DIRECTORY_SEPARATOR.
-                 "classTestSuite.php"
+                 "classCheckDigits.php"
     );
-    require_once(__DIR__.DIRECTORY_SEPARATOR."classCheckDigits.php");            
     
     # Tarkasta kelvollinen suomalainen BBAN    
     TestSuite::test("digits-1",function(){
