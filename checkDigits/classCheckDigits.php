@@ -45,7 +45,7 @@
             
             if (mb_ereg_match("^[0-9]{7}[\-]{1}[0-9]{1}$",$businessid)) {
                 $multipliers = array(7,9,10,5,8,4,2);
-                $substr = mb_substr($businessid,0,7).mb_substr($businessid,-1);
+                $substr = mb_substr($businessid,0,7);
                 $strlen = mb_strlen($substr);
                 $total = 0;
                 
@@ -117,10 +117,12 @@
                 $part2 = mb_substr($personid,7,4);
                 $delimiter = mb_substr($personid,6,1);
                 
-                $date = str_replace(array("+","-","A"),array("18","19","20"),$delimiter).
+                $arr = str_replace(array("+","-","A"),array("18","19","20"),$delimiter).
                     implode("-",array_reverse(str_split($part1,2)));
+                    
+                list($year,$month,$day) = explode("-",$arr);
                                 
-                if (DateTime::createFromFormat("Y-m-d",$date)) {
+                if (checkdate((int)$month,(int)$day,$year)) {
                     $result = Modulo::checkModulo31($part1.$part2);
                 }
             }
@@ -137,7 +139,7 @@
         public static function checkRFReference($reference) {
             $result = false;
             
-            if (mb_ereg_match("^RF{2}[0-9]{2}[A-Z0-9]{1,21}$",$reference)) {
+            if (mb_ereg_match("^RF[0-9]{2}[A-Z0-9]{1,21}$",$reference)) {
                 $result = Modulo::checkModulo97_10($reference);
             }
             
