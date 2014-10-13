@@ -12,9 +12,19 @@
         return CheckDigits::checkFIBBAN("159030776");
     },true);
     
+    # Tarkasta kelvollinen suomalainen BBAN (esitysmuotoinen)
+    TestSuite::test("digits-1.1",function(){
+        return CheckDigits::checkFIBBAN("159030-776");
+    },true);
+    
     # Tarkasta epäkelpo suomalainen BBAN    
     TestSuite::test("digits-2",function(){
         return CheckDigits::checkFIBBAN("15903072376");
+    },false);
+    
+    # Tarkasta epäkelpo suomalainen BBAN (esitysmuotoinen)   
+    TestSuite::test("digits-2.1",function(){
+        return CheckDigits::checkFIBBAN("159030-72376");
     },false);
     
     # Tarkasta kelvollinen suomalainen HETU
