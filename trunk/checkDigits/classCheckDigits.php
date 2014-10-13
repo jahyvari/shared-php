@@ -20,12 +20,29 @@
         }
         
         /**
-         * Tarkastaa suomalaisen konekielisen BBAN tilinumeron.
+         * Tarkastaa suomalaisen konekielisen tai esitysmuotoisen (viivallisen)
+         * BBAN tilinumeron.
          *
          * @param   string  $bban   BBAN
          * @return  bool
          */
         public static function checkFIBBAN($bban) {
+            $result = false;
+                        
+            if (mb_ereg_match("^[1-8]{1}[0-9]{5}(\-)?[0-9]{2,8}$",$bban)) {
+                $result = self::_checkFIBBAN(str_replace("-","",$bban));
+            }
+            
+            return $result;
+        }
+        
+        /**
+         * Tarkastaa suomalaisen konekielisen BBAN tilinumeron.
+         *
+         * @param   string  $bban   BBAN
+         * @return  bool
+         */
+        public static function _checkFIBBAN($bban) {
             $result = false;
                         
             if (mb_ereg_match("^[1-8]{1}[0-9]{7,13}$",$bban)) {
