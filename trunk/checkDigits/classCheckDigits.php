@@ -4,6 +4,22 @@
     
     class CheckDigits {
         /**
+         * Tarkastaa EAN-koodin (EAN-8, EAN-13 tai EAN-14).
+         *
+         * @param   string  $ean    EAN-koodi
+         * @return  bool
+         */
+        public static function checkEANCode($ean) {
+            $result = false;
+            
+            if (mb_ereg_match("^([0-9]{8}|[0-9]{13}|[0-9]{14})$",$ean)) {
+                $result = Modulo::checkModulo10($ean);
+            }
+            
+            return $result;
+        }
+        
+        /**
          * Tarkastaa suomalaisen konekielisen BBAN tilinumeron.
          *
          * @param   string  $bban   BBAN
