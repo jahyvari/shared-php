@@ -11,16 +11,45 @@
             
             if (mb_ereg_match("^[0-9]{2,}$",$val) && ltrim($val,"0")) {
                 $multiplier = 2;
-                $strlen = mb_strlen($val)-1;
+                $strlen = mb_strlen($val);
                 $sum = 0;
                 
-                for ($i = 0; $i < $strlen; $i++) {
+                for ($i = ($strlen-2); $i >= 0; $i--) {
                     $sum += array_sum(str_split(mb_substr($val,$i,1)*$multiplier--,1));
                     if ($multiplier == 0) {
                         $multiplier = 2;
                     }
                 }
-                                
+                                                
+                $check = 10-$sum%10;
+                
+                if (mb_substr($check,-1) == mb_substr($val,-1)) {
+                    $result = true;
+                }
+            }
+            
+            return $result;
+        }
+        
+        /**
+         * Tarkastaa arvon modulo 10 tarkisteen.
+         *
+         * @param   string  $val    Tarkastettava arvo
+         * @return  bool
+         */
+        public static function checkModulo10($val) {
+            $result = false;
+            
+            if (mb_ereg_match("^[0-9]{2,}$",$val) && ltrim($val,"0")) {
+                $multiplier = 3;
+                $strlen = mb_strlen($val);
+                $sum = 0;
+                
+                for ($i = ($strlen-2); $i >= 0; $i--) {
+                    $sum += mb_substr($val,$i,1)*$multiplier;
+                    $multiplier = (($multiplier == 3) ? 1 : 3);
+                }
+                
                 $check = 10-$sum%10;
                 
                 if (mb_substr($check,-1) == mb_substr($val,-1)) {

@@ -6,7 +6,7 @@
         DIRECTORY_SEPARATOR.
         "classCheckDigits.php"
     );
-    
+        
     # Tarkasta kelvollinen suomalainen BBAN    
     TestSuite::test("digits-1",function(){
         return CheckDigits::checkFIBBAN("159030776");
@@ -65,4 +65,34 @@
     # Tarkasta epäkelo suomalainen viite
     TestSuite::test("digits-12",function(){
         return CheckDigits::checFIReference("6174334");
+    },false);
+    
+    # Tarkasta kelvollinen EAN-8
+    TestSuite::test("digits-13",function(){
+        return CheckDigits::checkEANCode("73513537");
+    },true);
+    
+    # Tarkasta epäkelpo EAN-8
+    TestSuite::test("digits-14",function(){
+        return CheckDigits::checkEANCode("73512537");
+    },false);
+    
+    # Tarkasta kelvollinen EAN-13
+    TestSuite::test("digits-15",function(){
+        return CheckDigits::checkEANCode("4006381333931");
+    },true);
+    
+    # Tarkasta epäkelpo EAN-13
+    TestSuite::test("digits-16",function(){
+        return CheckDigits::checkEANCode("4002381333931");
+    },false);
+    
+    # Tarkasta kelvollinen EAN-14
+    TestSuite::test("digits-17",function(){
+        return CheckDigits::checkEANCode("11234567890125");
+    },true);
+    
+    # Tarkasta epäkelpo EAN-14
+    TestSuite::test("digits-18",function(){
+        return CheckDigits::checkEANCode("12234567890125");
     },false);
