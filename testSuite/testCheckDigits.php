@@ -74,7 +74,7 @@
         return _testCollection("fi_business_id.txt","checkFIBusinessId");
     },true);
         
-    # Tarkasta epäkelo suomalainen Y-tunnus
+    # Tarkasta epäkelpo suomalainen Y-tunnus
     TestSuite::test("digits-6",function(){
         return CheckDigits::checkFIBusinessId("0737547-2");
     },false);
