@@ -114,4 +114,23 @@
             
             return $result;
         }
+        
+        /**
+         * Luo arvon modulo 97-10 tarkisteen.
+         *
+         * @param   string  $prefix Etuliite (esim. RF)
+         * @param   string  $val    Arvo         
+         * @return  mixed
+         */
+        public static function createModulo97_10CheckDigit($prefix,$val) {
+            $result = false;
+            
+            if (mb_ereg_match("^[A-Z0-9]{1,}$",$val) && strlen($prefix) == 2) {
+                $val = str_replace(range("A","Z"),range("10","35"),$val.$prefix."00");                
+                $mod = 98-(int)bcmod(ltrim($val,"0"),"97");                
+                $result = (string)(($mod < 10) ? "0".$mod : $mod);                
+            }
+            
+            return $result;
+        }
     }

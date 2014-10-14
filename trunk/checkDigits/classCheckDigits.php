@@ -110,7 +110,7 @@
          * @param   string  $reference  Viitenumero
          * @return  bool
          */
-        public static function checFIReference($reference) {
+        public static function checkFIReference($reference) {
             $result = false;
             
             if (mb_ereg_match("^[0-9]{4,20}$",$reference)) {
@@ -174,6 +174,98 @@
             
             if (mb_ereg_match("^RF[0-9]{2}[A-Z0-9]{1,21}$",$reference)) {
                 $result = Modulo::checkModulo97_10($reference);
+            }
+            
+            return $result;
+        }
+        
+        /**
+         * Luo suomalaisen viitenumeron numeroarvosta.
+         *
+         * @param   string  $val    Numeroarvo
+         * @return  mixed
+         */
+        public static function createFIReference($val) {
+            $result = false;
+           
+            if (mb_ereg_match("^[0-9]{3,}$",$val)) {
+                $check = Multiplier137::createMultiplier137CheckDigit($val);
+                if ($check !== false) {
+                    $result = $val.$check;
+                }
+            }
+           
+            return $result;
+        }
+        
+        /**
+         * Luo RF viitteen merkkijonosta.
+         *
+         * @param   string  $val    Merkkijono
+         * @return  mixed
+         */
+        public static function createRFReference($val) {
+            $result = false;
+           
+            if (mb_ereg_match("^[A-Z0-9]{1,21}$",$val)) {
+                $prefix = "RF";
+                $check = Modulo::createModulo97_10CheckDigit($prefix,$val);
+                if ($check !== false) {
+                    $result = $prefix.$check.$val;
+                }
+            }
+           
+            return $result;
+        }
+        
+        /**
+         * Hakee suomalaiseen IBAN tilinumeroon liittyvän BIC:n.
+         *
+         * @param   string  $iban   IBAN
+         * @return  mixed
+         */
+        public static function getFIBIC($iban) {
+            $result = false;
+            
+            if (mb_substr($iban,0,2) == "FI" && self::checkIBAN($iban)) {
+                $bban = mb_substr($iban,4);
+                if (self::_checkFIBBAN($bban)) {
+                    $bic = array(
+                        "479"   => "POPFFI22",  # Bonum Pankki
+                        "713"   => "CITIFIHX",  # Citibank
+                        "8"     => "DABAFIHH",  # Danske Bank
+                        "34"    => "DABAFIHX",  # Danske Bank
+                        "37"    => "DNBAFIHX",  # DNB Bank ASA, Finland Branch
+                        "31"    => "HANDFIHH",  # Handelsbanken
+                        "1"     => "NDEAFIHH",  # Nordea Pankki (Nordea)
+                        "2"     => "NDEAFIHH",  # Nordea Pankki (Nordea)
+                        "5"     => "OKOYFIHH",  # Pohjola Pankki (OP-Pohjola-ryhmän pankkien keskusrahalaitos)
+                        "33"    => "ESSEFIHX",  # Skandinaviska Enskilda Banken (SEB)
+                        "39"    => "SBANFIHH",  # S-Pankki
+                        "38"    => "SWEDFIHH",  # Swedbank
+                        "4"     => "HELSFIHH",  # Aktia Pankki, Säästöpankit (Sp) ja POP Pankit (POP)
+                        "36"    => "TAPIFI22",  # Tapiola Pankki
+                        "715"   => "ITELFIHH",  # Säästöpankkien Keskuspankki
+                        "6"     => "AABAFI22"   # Ålandsbanken (ÅAB)
+                    );
+                    
+                    switch (mb_substr($bban,0,1)) {
+                        case "3":
+                            $len = 2;
+                            break;                        
+                        case "4":
+                        case "7":
+                            $len = 3;
+                            break;                        
+                        default:
+                            $len = 1;
+                    }
+                    
+                    $prefix = mb_substr($bban,0,$len);
+                    if (isset($bic[$prefix])) {
+                        $result = $bic[$prefix];
+                    }
+                }
             }
             
             return $result;
