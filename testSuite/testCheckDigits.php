@@ -98,15 +98,15 @@
     TestSuite::test("digits-10",function(){
         return CheckDigits::checkRFReference("RF97C3H5OH");
     },false);
-    
+        
     # Tarkasta 100 kappaletta suomalaisia kelvollisia viitteitä
     TestSuite::test("digits-11",function(){
-        return _testCollection("fi_reference.txt","checFIReference");
+        return _testCollection("fi_reference.txt","checkFIReference");
     },true);
         
     # Tarkasta epäkelpo suomalainen viite
     TestSuite::test("digits-12",function(){
-        return CheckDigits::checFIReference("6174334");
+        return CheckDigits::checkFIReference("6174334");
     },false);
     
     # Tarkasta kelvollinen EAN-8
@@ -138,3 +138,32 @@
     TestSuite::test("digits-18",function(){
         return CheckDigits::checkEANCode("12234567890125");
     },false);
+    
+    # Luo suomalainen viitenumero
+    $reference = null;
+    TestSuite::test("digits-19",function() use (&$reference){
+        $reference = CheckDigits::createFIReference("12345");
+        return strlen($reference);
+    },6);
+    
+    # Testaa luotu viitenumero
+    TestSuite::test("digits-19.1",function() use ($reference){
+        return CheckDigits::checkFIReference($reference);
+    },true);
+    
+    # Luo suomalaisesta viitteesta RF viite
+    $rfreference = null;
+    TestSuite::test("digits-20",function() use ($reference,&$rfreference){
+        $rfreference = CheckDigits::createRFReference($reference);
+        return strlen($rfreference);
+    },10);
+        
+    # Tarkasta luotu RF viite
+    TestSuite::test("digits-20.1",function() use ($rfreference){
+        return CheckDigits::checkRFReference($rfreference);
+    },true);
+    
+    # Hae suomalaisen IBAN:n BIC
+    TestSuite::test("digits-21",function(){
+        return strlen(CheckDigits::getFIBic("FI3715903000000776"));
+    },8);
