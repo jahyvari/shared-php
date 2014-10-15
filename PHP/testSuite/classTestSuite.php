@@ -1,4 +1,8 @@
 <?php
+    namespace SharedPHP;
+    
+    use Exception;
+    
     class TestSuite {
         private static $_sanityCheck = false;
         

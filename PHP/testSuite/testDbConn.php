@@ -6,7 +6,10 @@
         DIRECTORY_SEPARATOR.
         "classDB.php"
     );
-        
+    
+    use SharedPHP\TestSuite;
+    use SharedPHP\DB;
+            
     # Tarkasta yhteyden avaus
     TestSuite::test("dbconn-1",function(){
         DB::open("conn1");        

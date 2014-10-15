@@ -1,4 +1,4 @@
-<?php        
+<?php                
     require_once(__DIR__.DIRECTORY_SEPARATOR."config.php");
     require_once(dirname(__DIR__).
         DIRECTORY_SEPARATOR.
@@ -6,6 +6,9 @@
         DIRECTORY_SEPARATOR.
         "classCheckDigits.php"
     );
+    
+    use SharedPHP\TestSuite;
+    use SharedPHP\CheckDigits;
     
     # Muuta collection kansiossa oleva tiedosto taulukoksi
     function _collectionToArr($name) {
@@ -27,8 +30,8 @@
     function _testCollection($name,$function,$expected = true) {
         $result = !$expected;
         
-        if (method_exists("CheckDigits",$function)) {
-            foreach (_collectionToArr($name) as $row) {
+        if (method_exists("SharedPHP\CheckDigits",$function)) {
+            foreach (_collectionToArr($name) as $row) {                
                 $result = CheckDigits::$function(trim($row));
                 if ($result !== $expected) {
                     break;

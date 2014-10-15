@@ -1,5 +1,11 @@
 <?php
+    namespace SharedPHP;
+    
     require_once(__DIR__.DIRECTORY_SEPARATOR."classDbConn.php");
+    
+    use PDO;
+    use PDOException;
+    use PDOStatement;
     
     class PDOConn extends DbConn {
         const FETCH_ASSOC   = PDO::FETCH_ASSOC;
@@ -10,6 +16,8 @@
         private $_connectErrno  = 0;
         private $_connectError  = "";
         private $_driver        = null;
+        private $_errno         = 0;
+        private $_error         = "";
         
         public function __construct($driver,$data = array()) {
             $this->_driver = $driver;
@@ -74,29 +82,19 @@
         
         protected function _disconnect() {
             $this->_affectedRows = 0;
+            $this->_connectErrno = 0;
+            $this->_connectError = "";
+            $this->_errno = 0;
+            $this->_error = "";
             return true;
         }
         
         protected function _errno() {
-            $result = 0;
-            $error = $this->link->errorInfo();
-            
-            if (isset($error[1])) {
-                $result = $error[1];
-            }
-            
-            return $result;
+            return $this->_errno;
         }
         
         protected function _error() {
-            $result = "";
-            $error = $this->link->errorInfo();
-            
-            if (isset($error[2])) {
-                $result = $error[2];
-            }
-            
-            return $result;
+            return $this->_error;
         }
         
         protected function _escapeString($value) {
@@ -152,9 +150,11 @@
                 
         protected function _query($sql) {
             $this->_affectedRows = 0;
+            $this->_errno = 0;
+            $this->_error = "";
             
             $query = $this->link->prepare($sql,array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-
+            
             if ($query instanceof PDOStatement) {
                 if ($query->execute()) {
                     $sql = trim($query->queryString);
@@ -162,6 +162,14 @@
                         $this->_affectedRows = $query->rowCount();
                     }
                 } else {
+                    $error = $query->errorInfo();                    
+                    if (isset($error[1])) {
+                        $this->_errno = $error[1];
+                    }
+                    if (isset($error[2])) {
+                        $this->_error = $error[2];
+                    }                    
+                    
                     $query = false;
                 }
             }

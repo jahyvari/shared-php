@@ -6,6 +6,9 @@
         DIRECTORY_SEPARATOR.
         "classUnitConverter.php"
     );
+    
+    use SharedPHP\TestSuite;
+    use SharedPHP\UnitConverter;
         
     # Muuta senttimeteri jaloiksi
     $cm = 180;

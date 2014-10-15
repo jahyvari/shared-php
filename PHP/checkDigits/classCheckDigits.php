@@ -1,4 +1,6 @@
 <?php
+    namespace SharedPHP;
+    
     require_once(__DIR__.DIRECTORY_SEPARATOR."classModulo.php");
     require_once(__DIR__.DIRECTORY_SEPARATOR."classMultiplier137.php");
     
