@@ -1,4 +1,6 @@
 <?php
+    namespace SharedPHP;
+    
     class Multiplier137 {
         /**
          * Tarkastaa arvon kerroin 137 tarkisteen.

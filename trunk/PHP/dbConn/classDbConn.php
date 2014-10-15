@@ -1,4 +1,8 @@
 <?php
+    namespace SharedPHP;
+    
+    use Exception;
+    
     abstract class DbConn {
         const FETCH_ASSOC   = null;
         const FETCH_BOTH    = null;

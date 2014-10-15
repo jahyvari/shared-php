@@ -1,4 +1,6 @@
 <?php
+    namespace SharedPHP;
+    
     require_once(__DIR__.DIRECTORY_SEPARATOR."classDbConn.php");
     
     class MysqliConn extends DbConn {        

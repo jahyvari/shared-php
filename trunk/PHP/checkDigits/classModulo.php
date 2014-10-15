@@ -1,4 +1,6 @@
 <?php
+    namespace SharedPHP;
+    
     class Modulo {
         /**
          * Tarkastaa arvon Luhn mod 10 tarkisteen.

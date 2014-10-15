@@ -1,4 +1,6 @@
 <?php
+    namespace SharedPHP;
+        
     class UnitConverter {
         const CM_TO_INCH    = 0.393700787;
         const FOOT_TO_YARD  = 3;

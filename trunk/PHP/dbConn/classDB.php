@@ -1,6 +1,10 @@
 <?php
+    namespace SharedPHP;
+    
     require_once(__DIR__.DIRECTORY_SEPARATOR."classMysqliConn.php");
     require_once(__DIR__.DIRECTORY_SEPARATOR."classPDOConn.php");
+    
+    use Exception;
     
     class DB {
         private static $_conn = null;
