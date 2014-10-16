@@ -168,6 +168,12 @@ var SPTestSuite = new function() {
         return true;
     }
     
+    /**
+     * Tarkasta _compare funktion kelvollisuus ja nosta keskeytys mikäli
+     * funktio ei toimi halutulla tavalla.
+     *
+     * @returns bool
+     */
     var _sanityCheck = function() {
         if (!_compare(true,true)) {
             throw "Sanity check true==true failed!";
@@ -256,7 +262,7 @@ var SPTestSuite = new function() {
      * Funktion avulla voidaan testata palauttaako anymyymina funktiona
      * syötetty testitapaus odotetun paluuarvon.
      *
-     * Funktio lopettaa skriptin suorituksen mikäli arvot eivät täsmää.
+     * Funktio nostaa keskeytyksen mikäli arvot eivät täsmää.
      *
      * @param   string      name        Testin nimi
      * @param   function    func        Anonyymi funktio
