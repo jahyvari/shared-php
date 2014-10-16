@@ -20,56 +20,46 @@
             }
             
             $floatPattern = "^[0-9]{1,}(\.[0-9]{1,})?$";
-            $intPattern = "^[0-9]{1,}$";            
             
             # Verrataan odotettua paluuarvoa ja paluuarvoa datatyypin konversion avulla
             $compare = false;
             $type = gettype($excepted);
             switch ($type) {
                 case "boolean": # Boolean
-                    if ($excepted === (bool)$result) {
-                        $compare = true;
+                    if (is_string($result) || is_numeric($result)) {
+                        if (mb_ereg_match("^[01]{1}$",$result) &&
+                            $excepted === (bool)$result) {
+                            $compare = true;
+                        }
                     }
                     break;
-                
+                                
                 case "integer": # Kokonaisluku
+                case "double":  # Liukuluku
                     if (is_string($result) || is_numeric($result)) {
-                        if (mb_ereg_match($intPattern,$result) &&
-                            $excepted === (int)$result) {
-                            $compare = true;
+                        if (mb_ereg_match($floatPattern,$result)) {
+                            # Luvut ovat riittävän lähellä toisiaan
+                            if (abs($excepted-(double)$result) < 0.0000000001) {
+                                $compare = true;
+                            }
                         }
                     } else if (is_bool($result)) {
                         $compare = self::_compare($excepted,(int)$result);
                     }
                     break;
                 
-                case "double": # Liukuluku
-                    if (is_string($result) || is_numeric($result)) {
-                        if (mb_ereg_match($floatPattern,$result)) {
-                            # Liukuluvut ovat riittävän lähellä toisiaan
-                            if (abs($excepted-(double)$result) < 0.0000000001) {
-                                $compare = true;
-                            }
-                        }
-                    }
-                    break;
-                
                 case "string": # Merkkijono
                     if (is_string($result) || is_numeric($result)) {
-                        if (mb_ereg_match($intPattern,$excepted) &&
-                                mb_ereg_match($intPattern,$result)) {
-                            # Molemmat arvot ovat kokonaislukuja merkkijonossa
-                            $compare = self::_compare((int)$excepted,(int)$result);
-                        } else if (mb_ereg_match($floatPattern,$excepted) &&
-                                mb_ereg_match($floatPattern,$result)) {
-                            # Molemmat arvot ovat liukulukuja merkkijonossa
+                        if (mb_ereg_match($floatPattern,$excepted) &&
+                            mb_ereg_match($floatPattern,$result)) {
+                            # Molemmat arvot ovat numeroita merkkijonossa
                             $compare = self::_compare((double)$excepted,(double)$result);
                         }
                     } else if (is_bool($result)) {
                         $compare = self::_compare($excepted,(string)$result);
                     }
                     break;
-                
+                                
                 default: # Muu tietotyyppi
                     # Tietotyypit ovat samoja ja täsmävät löysällä vertailulla
                     if ($type == gettype($result) && $excepted == $result) {
@@ -136,6 +126,14 @@
                     throw new Exception("Sanity check 0.4!=0.39999 failed!");
                 }
                 
+                if (!self::_compare(null,null)) {
+                    throw new Exception("Sanity check null==null failed!");
+                }
+                
+                if (self::_compare(null,1)) {
+                    throw new Exception("Sanity check null!=1 failed!");
+                }
+                                
                 if (!self::_compare(array(1),array(1))) {
                     throw new Exception("Sanity check array(1)==array(1) failed!");
                 }
