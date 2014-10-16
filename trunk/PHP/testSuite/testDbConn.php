@@ -32,7 +32,7 @@
     $insertid = null;
     TestSuite::test("dbconn-2.1",function() use ($uniqid,&$insertid){
         $insertid = DB::insert("test",array("key1" => $uniqid));
-        return $insertid;
+        return (bool)$insertid;
     },true);
     
     # Tarkasta INSERT lause SELECT haulla
@@ -93,9 +93,9 @@
     # Testaa virhepalaute
     TestSuite::test("dbconn-4",function(){
         $query = DB::query("SELECT key2 FROM test WHERE id=1");
-        return DB::errno();
-    },1054);
+        return ((DB::errno() > 0) ? true : false);
+    },true);
     
     TestSuite::test("dbconn-4.1",function(){
-        return DB::error();
+        return (bool)DB::error();
     },true);
