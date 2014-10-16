@@ -7,9 +7,7 @@
         
     # Suoritetaan kaikki kansion testit
     foreach($glob as $test) {
-        $code       = 0;
-        $output     = array();
-        $basename   = basename($test);
+        $basename = basename($test);
         
         echo "Running $basename".str_repeat(".",40-strlen($basename))." ";
         $result = shell_exec("node $test");
