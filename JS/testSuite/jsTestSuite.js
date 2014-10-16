@@ -103,8 +103,9 @@ var SPTestSuite = new function() {
     }
     
     /**
-     * Funktio testaa onko syötetty arvo taulukko.
+     * Funktio testaa onko syötetty muuttuja taulukko.
      *
+     * @param   mixed   val Tarkastettava muuttuja
      * @returns bool
      */
     var _isArray = function(val) {
