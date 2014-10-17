@@ -304,3 +304,8 @@ var SPTestSuite = new function() {
         return true;
     }
 }
+
+// Node.js export
+if (module != "undefined" && module.hasOwnProperty("exports")) {
+    module.exports.SPTestSuite = SPTestSuite;
+}
