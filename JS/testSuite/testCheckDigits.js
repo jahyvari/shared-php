@@ -1,16 +1,15 @@
-var fs = require("fs");
 var path = require("path");
-
-eval(fs.readFileSync(__dirname+
+var ts = require(__dirname+
     path.sep+
-    "jsTestSuite.js").toString()
-);
-eval(fs.readFileSync(path.dirname(__dirname)+
+    "jsTestSuite.js");
+var cd = require(path.dirname(__dirname)+
     path.sep+
     "checkDigits"+
     path.sep+
-    "jsCheckDigits.js").toString()
-);
+    "jsCheckDigits.js");
+
+var SPTestSuite = ts.SPTestSuite;
+var SPCheckDigits = cd.SPCheckDigits;
 
 try {
     // Testaa suomalainen kelvollinen konekielinen BBAN
@@ -31,6 +30,26 @@ try {
     // Testaa suomalainen epäkelpo BBAN
     SPTestSuite.test("digits-1.3",function(){
         return SPCheckDigits.checkFIBBAN("159030-72376");
+    },false);
+    
+    // Testaa suomalainen kelvollinen Y-tunnus
+    SPTestSuite.test("digits-2",function(){
+        return SPCheckDigits.checkFIBusinessId("1738633-3");
+    },true);
+    
+    // Testaa suomalainen epäkelpo Y-tunnus
+    SPTestSuite.test("digits-2.1",function(){
+        return SPCheckDigits.checkFIBusinessId("1737633-3");
+    },false);
+    
+    // Testaa suomalainen kelvollinen viitenumero
+    SPTestSuite.test("digits-3",function(){
+        return SPCheckDigits.checkFIReference("42848");
+    },true);
+    
+    // Testaa suomalainen epäkelpo viitenumero
+    SPTestSuite.test("digits-3.1",function(){
+        return SPCheckDigits.checkFIReference("42648");
     },false);
 } catch (err) {
     console.log(err);

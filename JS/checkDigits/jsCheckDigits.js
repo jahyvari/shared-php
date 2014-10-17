@@ -1,4 +1,6 @@
 var SPModulo = new function() {
+    var _this = this;
+    
     /**
      * Tarkastaa arvon Luhn mod 10 tarkisteen.
      *
@@ -65,6 +67,63 @@ var SPModulo = new function() {
                 if (val.slice(-1) == check.toString().slice(-1)) {
                     result = true;
                 }
+            }
+        }
+        
+        return result;
+    }
+}
+
+var SPMultiplier137 = new function() {
+    var _this = this;
+    
+    /**
+     * Tarkastaa arvon kerroin 137 tarkisteen.
+     *
+     * @param   string  val     Tarkastettava arvo
+     * @returns bool
+     */
+    this.checkMultiplier137 = function(val) {
+        var result = false;
+        
+        if (/^[0-9]{4,}$/.test(val)) {
+            val = val.toString();
+            
+            var check = _this.createMultiplier137CheckDigit(val.slice(0,val.length-1));
+            if (check !== false && check == parseInt(val.slice(-1))) {
+                result = true;
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Luo arvon kerroin 137 tarkisteen.
+     *
+     * @param   string  val     Arvo
+     * @returns mixed
+     */
+    this.createMultiplier137CheckDigit = function(val) {
+        var result = false;
+        
+        if (/^[0-9]{3,}$/.test(val)) {
+            val = val.toString();
+            
+            var multipliers = [7,3,1];
+            var x = 0;
+            var sum = 0;
+            
+            for (var i = (val.length-1); i >= 0; i--) {
+                sum += parseInt(val.charAt(i))*multipliers[x++];
+                if (x == 3) {
+                    x = 0;
+                }
+            }
+            
+            if (sum > 0) {
+                var check = 10-sum%10;
+                result = parseInt(check.toString().slice(-1));
             }
         }
         
@@ -150,4 +209,64 @@ var SPCheckDigits = new function() {
         
         return result;
     }
+    
+    /**
+     * Tarkastaa suomalaisen Y-tunnuksen.
+     *
+     * @param   string  businessid  Y-tunnus
+     * @returns bool
+     */
+    this.checkFIBusinessId = function(businessid) {
+        var result = false;
+        
+        if (/^[0-9]{7}[\-]{1}[0-9]{1}$/.test(businessid)) {
+            businessid = businessid.toString();
+            
+            var multipliers = [7,9,10,5,8,4,2];
+            var sum = 0;
+            
+            for (var i = 0; i < 7; i++) {
+                sum += parseInt(businessid.charAt(i))*multipliers[i];
+            }
+            
+            if (sum > 0) {
+                var check = sum%11;
+                
+                if (check == 0 || (check >= 2 && check <= 10)) {
+                    if (check >= 2) {
+                        check = 11-check;
+                    }
+                    
+                    if (parseInt(businessid.slice(-1)) == check) {
+                        result = true;
+                    }
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Tarkastaa suomalaisen viitenumeron.
+     *
+     * @param   string  reference   Viitenumero
+     * @returns bool
+     */
+    this.checkFIReference = function(reference) {
+        var result = false;
+        
+        if (/^[0-9]{4,20}$/.test(reference)) {
+            result = SPMultiplier137.checkMultiplier137(reference);
+        }
+        
+        return result;
+    }
+}
+
+// Node.js export
+if (module != "undefined" && module.hasOwnProperty("exports")) {
+    module.exports.SPModulo = SPModulo;
+    module.exports.SPMultiplier137 = SPMultiplier137;
+    module.exports.SPCheckDigits = SPCheckDigits;
 }
