@@ -51,6 +51,65 @@ try {
     SPTestSuite.test("digits-3.1",function(){
         return SPCheckDigits.checkFIReference("42648");
     },false);
+    
+    // Testaa kelvollinen IBAN
+    SPTestSuite.test("digits-4",function(){
+        return SPCheckDigits.checkIBAN("VG60VLWA0096206253608550");
+    },true);
+    
+    // Testaa epäkelpo IBAN
+    SPTestSuite.test("digits-4.1",function(){
+        return SPCheckDigits.checkIBAN("VG60V0WA0096206253608550");
+    },false);
+    
+    // Testaa suomalainen kelvollinen HETU
+    SPTestSuite.test("digits-5",function(){
+        return SPCheckDigits.checkFIPersonId("271073-6808");
+    },true);
+    
+    // Testaa suomalainen epäkelpo HETU
+    SPTestSuite.test("digits-5.1",function(){
+        return SPCheckDigits.checkFIPersonId("271083-6808");
+    },false);
+    
+    // Testaa kelvollinen RF viite
+    SPTestSuite.test("digits-6",function(){
+        return SPCheckDigits.checkRFReference("RF84UNEA4CYDT0WNT26Y");
+    },true);
+    
+    // Testaa epäkelpo RF viite
+    SPTestSuite.test("digits-6.1",function(){
+        return SPCheckDigits.checkRFReference("RF84U6EA4CYDT0WNT26Y");
+    },false);
+    
+    // Luo suomalainen viitenumero
+    var ref = null;
+    SPTestSuite.test("digits-7",function(){
+        ref = SPCheckDigits.createFIReference("12345");
+        return String(ref).length;
+    },6);
+    
+    // Tarkasta luotu viitenumero
+    SPTestSuite.test("digits-7.1",function(){
+        return SPCheckDigits.checkFIReference(ref);
+    },true);
+    
+    // Luo suomalaisesta viitteestä RF viite
+    var rfref = null;
+    SPTestSuite.test("digits-8",function(){
+        rfref = SPCheckDigits.createRFReference(ref);
+        return String(rfref).length;
+    },10);
+    
+    // Tarkasta luotu RF viite
+    SPTestSuite.test("digits-8.1",function(){
+        return SPCheckDigits.checkRFReference(rfref);
+    },true);
+    
+    // Hae suomalaisen IBAN:n BIC
+    SPTestSuite.test("digits-9",function(){
+        return SPCheckDigits.getFIBIC("FI3715903000000776");
+    },"NDEAFIHH");
 } catch (err) {
     console.log(err);
 }

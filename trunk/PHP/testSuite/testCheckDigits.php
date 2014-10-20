@@ -168,5 +168,5 @@
     
     # Hae suomalaisen IBAN:n BIC
     TestSuite::test("digits-21",function(){
-        return strlen(CheckDigits::getFIBic("FI3715903000000776"));
-    },8);
+        return CheckDigits::getFIBic("FI3715903000000776");
+    },"NDEAFIHH");

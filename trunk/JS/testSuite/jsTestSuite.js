@@ -306,6 +306,6 @@ var SPTestSuite = new function() {
 }
 
 // Node.js export
-if (module != "undefined" && module.hasOwnProperty("exports")) {
+if (typeof module == "object" && module.hasOwnProperty("exports")) {
     module.exports.SPTestSuite = SPTestSuite;
 }
