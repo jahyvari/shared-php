@@ -190,7 +190,7 @@
         public static function createFIReference($val) {
             $result = false;
            
-            if (mb_ereg_match("^[0-9]{3,}$",$val)) {
+            if (mb_ereg_match("^[0-9]{3,19}$",$val)) {
                 $check = Multiplier137::createMultiplier137CheckDigit($val);
                 if ($check !== false) {
                     $result = $val.$check;

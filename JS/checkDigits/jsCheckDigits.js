@@ -2,6 +2,53 @@ var SPModulo = new function() {
     var _this = this;
     
     /**
+     * Laskee jakojäännöksen suuresta kokonaisluvusta.
+     *
+     * @param   string  val     Kokonaisluku
+     * @param   int     modulo  Jakaja
+     * @returns mixed
+     */
+    var _mod = function(val,modulo) {
+        var result = false;
+        var mod = parseInt(modulo);
+        
+        if (/^[0-9]{1,}$/.test(val) && mod == modulo && mod > 0) {
+            val = val.toString();
+            
+            while (val.length > 10) {
+                var part = val.slice(0,10);
+                val = (parseInt(part)%mod)+val.slice(10);
+            }
+            
+            result = parseInt(val)%mod;
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Korvaa Mod 97-10 tarkisteen aakkoset numeroarvoilla.
+     *
+     * @param   string  val Korvattava merkkijono
+     * @returns string
+     */
+    var _replaceMod97_10Alphas = function(val) {
+        var result = val;
+        
+        if (/^[A-Z0-9]{1,}$/.test(result)) {
+            result = result.toString();
+            
+            var s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";            
+            for (var i = 10; i <= 35; i++) {
+                var regexp = new RegExp(s.charAt(i-10),"g");
+                result = result.replace(regexp,i.toString());
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
      * Tarkastaa arvon Luhn mod 10 tarkisteen.
      *
      * @param   string  val     Tarkastettava arvo
@@ -68,6 +115,83 @@ var SPModulo = new function() {
                     result = true;
                 }
             }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Tarkastaa arvon modulo 31 tarkisteen.
+     *
+     * @param   string  val     Tarkastettava arvo
+     * @returns bool
+     */
+    this.checkModulo31 = function(val) {
+        var result = false;
+        
+        if (/^[0-9]{1,}[0-9A-FHJ-NPR-Y]{1}$/.test(val)) {
+            val = val.toString();
+            
+            var arr = ["0","1","2","3","4",
+                "5","6","7","8","9",
+                "A","B","C","D","E",
+                "F","H","J","K","L",
+                "M","N","P","R","S",
+                "T","U","V","W","X",
+                "Y"];
+            
+            if (val.replace(/^[0]{1,}/,"").length > 0) {
+                var check = _mod(val.slice(0,-1),31);
+                if (check !== false && arr.length > check) {
+                    if (val.slice(-1) == arr[check]) {
+                        result = true;
+                    }
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Tarkastaa arvon modulo 97-10 tarkisteen.
+     *
+     * @param   string  val     Tarkastettava arvo
+     * @returns bool
+     */
+    this.checkModulo97_10 = function(val) {
+        var result = false;
+        
+        if (/^[A-Z0-9]{5,}$/.test(val)) {
+            val = val.toString();
+                        
+            var substr = _replaceMod97_10Alphas(val.slice(4)+val.slice(0,4));
+            if (_mod(substr,97) == 1) {
+                result = true;
+            }
+        }
+    
+        return result;
+    }
+    
+    /**
+     * Luo arvon modulo 97-10 tarkisteen.
+     *
+     * @param   string  prefix  Etuliite (esim. RF)
+     * @param   string  val     Arvo         
+     * @returns mixed
+     */
+    this.createModulo97_10CheckDigit = function(prefix,val) {
+        var result = false;
+        
+        if (/^[A-Z0-9]{1,}$/.test(val) && prefix.length == 2) {
+            var substr = _replaceMod97_10Alphas(val+prefix+"00");
+            var mod = 98-_mod(substr,97);
+            if (mod < 10) {
+                mod = "0"+mod;
+            }
+            
+            result = mod.toString();
         }
         
         return result;
@@ -262,10 +386,165 @@ var SPCheckDigits = new function() {
         
         return result;
     }
+    
+    /**
+     * Tarkastaa IBAN tilinumeron.
+     *
+     * @param   string  iban    IBAN
+     * @returns bool
+     */
+    this.checkIBAN = function(iban) {
+        var result = false;
+        
+        if (/^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/.test(iban)) {
+            result = SPModulo.checkModulo97_10(iban);    
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Tarkastaa suomalaisen henkilötunnuksen.
+     *
+     * @param   string  personid    Henkilötunnus
+     * @return  bool
+     */
+    this.checkFIPersonId = function(personid) {
+        var result = false;
+        
+        if (/^[0-9]{6}[\+\-A]{1}[0-9]{3}[0-9A-FHJ-NPR-Y]{1}$/.test(personid)) {
+            personid = personid.toString();
+            
+            var day = parseInt(personid.slice(0,2));
+            var month = parseInt(personid.slice(2,4))-1;
+            var year = personid.slice(4,6);
+            
+            year = personid.slice(6,7).
+                replace("A","18").
+                replace("-","19").
+                replace("+","20")+
+                year;
+            
+            var d = new Date(year,month,day);
+            if (d.getFullYear() == year && d.getMonth() == month && d.getDate() == day) {
+                result = SPModulo.checkModulo31(personid.slice(0,6)+personid.slice(7));
+            }
+        }
+        
+        return result;    
+    }
+    
+    /**
+     * Tarkastaa RF viitteen.
+     *
+     * @param   string  reference   Viite
+     * @return  bool
+     */
+    this.checkRFReference = function(reference) {
+        var result = false;
+        
+        if (/^RF[0-9]{2}[A-Z0-9]{1,21}$/.test(reference)) {
+            result = SPModulo.checkModulo97_10(reference);    
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Luo suomalaisen viitenumeron numeroarvosta.
+     *
+     * @param   string  val     Numeroarvo
+     * @returns mixed
+     */
+    this.createFIReference = function(val) {
+        var result = false;
+        
+        if (/^[0-9]{3,19}$/.test(val)) {
+            var check = SPMultiplier137.createMultiplier137CheckDigit(val);
+            if (check !== false) {
+                result = val.toString()+check;
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Luo RF viitteen merkkijonosta.
+     *
+     * @param   string  val     Merkkijono
+     * @returns mixed
+     */
+    this.createRFReference = function(val) {
+        var result = false;
+        
+        if (/^[A-Z0-9]{1,21}$/.test(val)) {
+            var prefix = "RF";
+            var check = SPModulo.createModulo97_10CheckDigit(prefix,val);
+            if (check !== false) {
+                result = prefix+check+val;
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Hakee suomalaiseen IBAN tilinumeroon liittyvän BIC:n.
+     *
+     * @param   string  iban   IBAN
+     * @returns mixed
+     */
+    this.getFIBIC = function(iban) {
+        var result = false;
+        
+        if (iban.slice(0,2) == "FI" && _this.checkIBAN(iban)) {
+            var bban = iban.slice(4);
+            if (_this._checkFIBBAN(bban)) {
+                var bic = {
+                    "479"   : "POPFFI22",  // Bonum Pankki
+                    "713"   : "CITIFIHX",  // Citibank
+                    "8"     : "DABAFIHH",  // Danske Bank
+                    "34"    : "DABAFIHX",  // Danske Bank
+                    "37"    : "DNBAFIHX",  // DNB Bank ASA, Finland Branch
+                    "31"    : "HANDFIHH",  // Handelsbanken
+                    "1"     : "NDEAFIHH",  // Nordea Pankki (Nordea)
+                    "2"     : "NDEAFIHH",  // Nordea Pankki (Nordea)
+                    "5"     : "OKOYFIHH",  // Pohjola Pankki (OP-Pohjola-ryhmän pankkien keskusrahalaitos)
+                    "33"    : "ESSEFIHX",  // Skandinaviska Enskilda Banken (SEB)
+                    "39"    : "SBANFIHH",  // S-Pankki
+                    "38"    : "SWEDFIHH",  // Swedbank
+                    "4"     : "HELSFIHH",  // Aktia Pankki, Säästöpankit (Sp) ja POP Pankit (POP)
+                    "36"    : "TAPIFI22",  // Tapiola Pankki
+                    "715"   : "ITELFIHH",  // Säästöpankkien Keskuspankki
+                    "6"     : "AABAFI22"   // Ålandsbanken (ÅAB)
+                };
+                
+                switch (bban.slice(0,1)) {
+                    case "3":
+                        var len = 2;
+                        break;                        
+                    case "4":
+                    case "7":
+                        var len = 3;
+                        break;                        
+                    default:
+                        var len = 1;
+                }
+                
+                var prefix = bban.slice(0,len);
+                if (bic.hasOwnProperty(prefix)) {
+                    result = bic[prefix];
+                }
+            }
+        }
+        
+        return result;
+    }
 }
 
 // Node.js export
-if (module != "undefined" && module.hasOwnProperty("exports")) {
+if (typeof module == "object" && module.hasOwnProperty("exports")) {
     module.exports.SPModulo = SPModulo;
     module.exports.SPMultiplier137 = SPMultiplier137;
     module.exports.SPCheckDigits = SPCheckDigits;
