@@ -407,7 +407,7 @@ var SPCheckDigits = new function() {
      * Tarkastaa suomalaisen henkilötunnuksen.
      *
      * @param   string  personid    Henkilötunnus
-     * @return  bool
+     * @returns bool
      */
     this.checkFIPersonId = function(personid) {
         var result = false;
@@ -438,7 +438,7 @@ var SPCheckDigits = new function() {
      * Tarkastaa RF viitteen.
      *
      * @param   string  reference   Viite
-     * @return  bool
+     * @returns bool
      */
     this.checkRFReference = function(reference) {
         var result = false;
