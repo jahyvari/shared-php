@@ -34,37 +34,58 @@ function SPDbConn (data) {
                     _this.connected = true;
                     
                     if (typeof callback == "function") {
-                        callback.call(_this);
+                        callback.call(null);
                     }
                 } else {
                     throw _this.connectError;
                 }
             });
         } else if (typeof callback == "function") {
-            callback.call(_this);
+            callback.call(null);
         }
     }
     this._connect = function(callback) {
-        throw "_connect not implemented!";
+        throw "_connect() not implemented!";
+    }
+    
+    /**
+     * Katkaisee yhteyden tietokantaan. Virhetilanteessa funktio nostaa keskeytyksen.
+     *
+     * @param   function    callback    Funktio joka ajetaan onnistuneen katkaisun jälkeen (vapaaehtoinen)
+     */
+    this.disconnect = function(callback) {
+        if (_this.connected) {
+            _this._disconnect(function(){
+                _this.connected = false;
+                _this.connectError = "";
+                
+                if (typeof callback == "function") {
+                    callback.call(null);
+                }
+            }); 
+        }
+    }
+    this._disconnect = function(callback) {
+        throw "_disconnect() not implemented!";
     }
     
     /**
      * Suorittaa SQL kyselyn tietokantaan.
      *
      * @param   string      sql         SQL kysely
-     * @param   function    callback    Funktio joka ajetaan kyselyn päätteeksi
+     * @param   function    callback    Funktio joka ajetaan kyselyn päätteeksi (vapaaehtoinen)
      */
     this.query = function(sql,callback) {
         _this.connect(function(){
-            _this._query(sql,function(errno,error,result){
+            _this._query(sql,function(results){
                 if (typeof callback == "function") {
-                    // FIXME: Kutsu callback funktiota
+                    callback.call(results);
                 }
             });
         });
     }
     this._query = function(sql,callback) {
-        throw "_query not implemented!";
+        throw "_query() not implemented!";
     }
 }
 
@@ -83,7 +104,7 @@ function SPMySQL (data) {
             port        : _this.port,
             timeout     : _this.timeout
         });
-        
+            
         _this.link.connect(function(err){
             if (err) {
                 _this.connectError = err.code;
@@ -92,23 +113,47 @@ function SPMySQL (data) {
         });        
     }
     
+    this._disconnect = function(callback) {
+        _this.link.end(function(err) {
+            if (err) {
+                throw err.code;
+            }
+            
+            callback.call(_this);
+        });
+    }
+    
     this._query = function(sql,callback) {
         _this.link.query(sql,function(err,result){
-            var errno = 0;
-            var error = "";
-            var _result = {};
+            var affrows     = 0;
+            var errno       = 0;
+            var error       = "";
+            var insertId    = 0;
+            var _result     = {};
             
             if (err) {
                 errno = err.errno;
                 error = err.code;                
             } else {
-                _result = result;
+                if (/^(delete|insert|replace|update)/i.test(sql.trim())) {
+                    if (result.hasOwnProperty("affectedRows")) {
+                        affrows = result.affectedRows;
+                    }
+                    if (result.hasOwnProperty("insertId")) {
+                        insertId = result.insertId;
+                    }
+                } else {
+                    _result = result;    
+                }                
             }
             
-            callback.call(_this,errno,error,_result);
-            
-            // FIXME: Luo disconnect metodi
-            _this.link.end();
+            callback.call(_this,{
+                "affrows"   : affrows,
+                "errno"     : errno,
+                "error"     : error,
+                "insertId"  : insertId,
+                "result"    : _result
+            });
         });
     }
 }
