@@ -2,10 +2,14 @@ function SPDbConn (data) {
     var _this = this;
         
     // Julkiset attribuutit
+    this.affrows        = 0;
     this.connected      = false;
     this.connectError   = "";
     this.database       = null;
+    this.errno          = 0;
+    this.error          = "";
     this.host           = null;
+    this.insertId       = 0;
     this.link           = null;
     this.passwd         = null;
     this.port           = null;
@@ -23,49 +27,47 @@ function SPDbConn (data) {
     }
     
     /**
-     * Yhdistää tietokantaan. Virhetilanteessa funktio nostaa keskeytyksen.
+     * Yhdistää tietokantaan.
      *
-     * @param   function    callback    Funktio joka ajetaan onnistuneen yhdistämisen jälkeen (vapaaehtoinen)
+     * @returns bool
      */
-    this.connect = function(callback) {
+    this.connect = function* () {
+        var result = false;
         if (!_this.connected) {
-            _this._connect(function(){
-                if (_this.connectError == "") {
-                    _this.connected = true;
-                    
-                    if (typeof callback == "function") {
-                        callback.call(null);
-                    }
-                } else {
-                    throw _this.connectError;
-                }
-            });
-        } else if (typeof callback == "function") {
-            callback.call(null);
+            result = yield _this._connect();
+            if (result) {
+                _this.connected = true;
+            }
+        } else {
+            result = true;
         }
+        return result;
     }
-    this._connect = function(callback) {
+    this._connect = function* () {
         throw "_connect() not implemented!";
     }
     
     /**
-     * Katkaisee yhteyden tietokantaan. Virhetilanteessa funktio nostaa keskeytyksen.
+     * Katkaisee yhteyden tietokantaan.
      *
-     * @param   function    callback    Funktio joka ajetaan onnistuneen katkaisun jälkeen (vapaaehtoinen)
+     * @returns bool
      */
-    this.disconnect = function(callback) {
+    this.disconnect = function* () {
+        var result = false;
         if (_this.connected) {
-            _this._disconnect(function(){
-                _this.connected = false;
-                _this.connectError = "";
-                
-                if (typeof callback == "function") {
-                    callback.call(null);
-                }
-            }); 
+            result = yield _this._disconnect();
+            if (result) {
+                _this.affrows       = 0;
+                _this.connected     = false;
+                _this.connectError  = "";                
+                _this.errno         = 0;
+                _this.error         = "";
+                _this.insertId      = 0;
+            }
         }
+        return result;
     }
-    this._disconnect = function(callback) {
+    this._disconnect = function* () {
         throw "_disconnect() not implemented!";
     }
     
@@ -92,7 +94,7 @@ function SPDbConn (data) {
      * @returns string
      */
     this.escape = function(val) {
-        var result = undefined;
+        var result = false;
         
         switch (typeof val) {
             case "boolean":
@@ -124,7 +126,7 @@ function SPDbConn (data) {
                     } else if (val instanceof Array) {
                         if (val.length > 0) {
                             for (i in val) {
-                                if (result === undefined) {
+                                if (result === false) {
                                     result = "";
                                 }                            
                                 result += ((result.length > 0) ? ", " : "")+
@@ -153,9 +155,9 @@ function SPDbConn (data) {
      * @param   string  val     Parametri
      * @returns mixed
      */
-    this.escapeString = function(val) {
+    this.escapeString = function* (val) {
         var result = false;
-        if (_this.connected) {
+        if (yield _this.connect()) {
             result = _this._escapeString(val);
         }
         return result;
@@ -165,21 +167,27 @@ function SPDbConn (data) {
     }
     
     /**
-     * Suorittaa SQL kyselyn tietokantaan.
+     * Suorittaa SQL kyselyn tietokantaan ja palauttaa kyselyn tulosjoukon.
      *
-     * @param   string      sql         SQL kysely
-     * @param   function    callback    Funktio joka ajetaan kyselyn päätteeksi (vapaaehtoinen)
+     * Jos kysely ei palauta tulosjoukkoa palautetaan boolean true.
+     *
+     * @param   string  sql SQL kysely
+     * @returns mixed
      */
-    this.query = function(sql,callback) {
-        _this.connect(function(){
-            _this._query(sql,function(results){
-                if (typeof callback == "function") {
-                    callback.call(results);
-                }
-            });
-        });
+    this.query = function* (sql) {
+        var result = false;
+        
+        _this.affrows   = 0;        
+        _this.errno     = 0;
+        _this.error     = "";
+        _this.insertId  = 0;
+        
+        if (yield _this.connect()) {
+            result = yield _this._query(sql);
+        }
+        return result;
     }
-    this._query = function(sql,callback) {
+    this._query = function* (sql,callback) {
         throw "_query() not implemented!";
     }
 }
@@ -190,7 +198,9 @@ function SPMySQL (data) {
     
     SPDbConn.call(_this,data);
         
-    this._connect = function(callback) {
+    this._connect = function* (){
+        var result = false;
+        
         _this.link = _mysql.createConnection({
             host        : _this.host,
             user        : _this.username,
@@ -199,23 +209,40 @@ function SPMySQL (data) {
             port        : _this.port,
             timeout     : _this.timeout
         });
-            
-        _this.link.connect(function(err){
-            if (err) {
-                _this.connectError = err.code;
-            }            
-            callback.call(_this);
-        });        
+        
+        var connect = function() {
+            return function(callback) {
+                _this.link.connect(callback);
+            }
+        }        
+                
+        try {
+            yield connect();
+            result = true;
+        } catch(e) {
+            _this.connectError = e.code;
+        }
+        
+        return result;
     }
     
-    this._disconnect = function(callback) {
-        _this.link.end(function(err) {
-            if (err) {
-                throw err.code;
+    this._disconnect = function* (callback) {
+        var result = false;
+        
+        var disconnect = function() {
+            return function(callback) {
+                _this.link.end(callback);
             }
-            
-            callback.call(_this);
-        });
+        }
+                        
+        try {
+            yield disconnect();
+            result = true;
+        } catch(e) {
+            // NOPE
+        }
+        
+        return result;
     }
     
     this._escapeString = function(val) {
@@ -226,38 +253,35 @@ function SPMySQL (data) {
         return result;
     }
     
-    this._query = function(sql,callback) {
-        _this.link.query(sql,function(err,result){
-            var affrows     = 0;
-            var errno       = 0;
-            var error       = "";
-            var insertId    = 0;
-            var _result     = {};
-            
-            if (err) {
-                errno = err.errno;
-                error = err.code;                
-            } else {
-                if (/^(delete|insert|replace|update)/i.test(sql.trim())) {
-                    if (result.hasOwnProperty("affectedRows")) {
-                        affrows = result.affectedRows;
-                    }
-                    if (result.hasOwnProperty("insertId")) {
-                        insertId = result.insertId;
-                    }
-                } else {
-                    _result = result;    
-                }                
+    this._query = function* (sql) {
+        var result = false;
+        
+        var query = function(sql) {
+            return function(callback) {
+                _this.link.query(sql,callback);
             }
+        }
             
-            callback.call(_this,{
-                "affrows"   : affrows,
-                "errno"     : errno,
-                "error"     : error,
-                "insertId"  : insertId,
-                "result"    : _result
-            });
-        });
+        try {
+            var query = yield query(sql);
+            
+            if (/^(delete|insert|replace|update)/i.test(sql.trim())) {
+                if (query[0].hasOwnProperty("affectedRows")) {
+                    _this.affrows = query[0].affectedRows;
+                }
+                if (query[0].hasOwnProperty("insertId")) {
+                    _this.insertId = query[0].insertId;
+                }
+                result = true;
+            } else {
+                result = query[0];
+            }
+        } catch(e) {
+            _this.errno = err.errno;
+            _this.error = err.code;                
+        }
+                
+        return result;
     }
 }
 SPMySQL.prototype = Object.create(SPDbConn.prototype);
