@@ -70,6 +70,101 @@ function SPDbConn (data) {
     }
     
     /**
+     * Funktio tekee parametristä tietoturvallisen
+     * SQL - injektioiden varalta.
+     *
+     * Parametri voi olla taulukko jolloin taulukon
+     * arvot palautetaan pilkulla eroteltuina.
+     *
+     * NULL parametri palautetaan merkkijonona "NULL".
+     *
+     * Boolean parametri muutetaan arvoon 1 tai 0.
+     *
+     * Päivämääräobjekti muutetaan Y-m-d muotoon.
+     *
+     * Numeerisessa ja merkkijonossa asetetaan ' - merkit
+     * parametrin ympärille ja ajetaan parametri _escapeString()
+     * funktion läpi.
+     *
+     * Muissa tietotyypeissä nostetaan keskeytys.
+     * 
+     * @param   mixed   val     Parametri
+     * @returns string
+     */
+    this.escape = function(val) {
+        var result = undefined;
+        
+        switch (typeof val) {
+            case "boolean":
+                result = ((result) ? "1" : "0");
+                break;
+                        
+            case "number":
+            case "string":
+                result = "'"+_this.escapeString(val.toString())+"'";
+                break;
+            
+            case "object":
+                if (val === null) {
+                    result = "NULL";
+                } else {
+                    if (val instanceof Date) {
+                        var year = val.getFullYear();
+                        var month = val.getMonth()+1;
+                        var date = val.getDate();
+                        
+                        if (month < 10) {
+                            month = "0"+month;
+                        }
+                        if (date < 10) {
+                            date = "0"+date;
+                        }
+                        
+                        result = year+"-"+month+"-"+date;
+                    } else if (val instanceof Array) {
+                        if (val.length > 0) {
+                            for (i in val) {
+                                if (result === undefined) {
+                                    result = "";
+                                }                            
+                                result += ((result.length > 0) ? ", " : "")+
+                                    _this.escape(val[i]);
+                            }
+                        } else {
+                            throw "Val is an empty array!";
+                        }
+                    } else {
+                        throw "Unsupported object!";
+                    }
+                }
+                break;
+                        
+            default:
+                throw "Unsupported escape type "+typeof val+"!";
+                break;
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Ajaa parametrin escape funktion läpi.
+     *
+     * @param   string  val     Parametri
+     * @returns mixed
+     */
+    this.escapeString = function(val) {
+        var result = false;
+        if (_this.connected) {
+            result = _this._escapeString(val);
+        }
+        return result;
+    }
+    this._escapeString = function(val) {
+        throw "_escapeString() not implemented!";
+    }
+    
+    /**
      * Suorittaa SQL kyselyn tietokantaan.
      *
      * @param   string      sql         SQL kysely
@@ -121,6 +216,14 @@ function SPMySQL (data) {
             
             callback.call(_this);
         });
+    }
+    
+    this._escapeString = function(val) {
+        var result = _this.link.escape(val);
+        if (/^'[\S\s]{1,}'$/.test(result)) {
+            result = result.slice(1,-1);
+        }
+        return result;
     }
     
     this._query = function(sql,callback) {
