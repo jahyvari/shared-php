@@ -244,7 +244,7 @@
         }
         protected abstract function _error();
         
-        /*
+        /**
          * Funktio tekee parametristä tietoturvallisen
          * SQL - injektioiden varalta.
          *
@@ -253,15 +253,20 @@
          *
          * NULL parametri palautetaan merkkijonona "NULL".
          *
+         * Boolean parametri muutetaan arvoon 1 tai 0.
+         *
          * Muissa tietotyypeissä (kokonaisluku,merkkijono jne.)
-         * asetetaan ' - merkit parametrin ympärille.
+         * asetetaan ' - merkit parametrin ympärille ja ajetaan
+         * parametri escapeString() funktion läpi.
          * 
          * @param   mixed   $value  Parametri
          * @return  string
          */
-        public function escape($value) {            
+        public function escape($value) {
             if (is_null($value)) {
                 $result = "NULL";
+            } else if (is_bool($value)) {
+                $result = (($result) ? "1" : "0");
             } else if (is_array($value)) {
                 if (!empty($value)) {
                     $result = "";                    
