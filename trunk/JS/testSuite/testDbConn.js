@@ -10,14 +10,9 @@ var db = require(path.dirname(__dirname)+
     "jsDbConn.js");
 
 var SPTestSuite = ts.SPTestSuite;
-var db = new db.SPMySQL({
-    "host"      : "localhost",
-    "username"  : "username",
-    "passwd"    : "password",
-    "database"  : "test"
-});
+var db = new db.SPMySQL();
 
-co(function* (){            
+co(function* (){    
     // Testaa yhteyden avaus
     var open = yield db.connect();
     SPTestSuite.test("dbconn-1",function (){

@@ -1,5 +1,7 @@
 function SPDbConn (data) {
     var _this = this;
+    var _fs = require("fs");
+    var _path = require("path");
         
     // Julkiset attribuutit
     this.affrows        = 0;
@@ -15,6 +17,28 @@ function SPDbConn (data) {
     this.port           = null;
     this.timeout        = null;
     this.username       = null;
+    
+    if (typeof data == "undefined") {
+        data = {};
+        
+        var file = (process.env.HOME ||
+            process.env.HOMEPATH ||
+            process.env.USERPROFILE)+
+            _path.sep+
+            ".dbconn";
+        
+        if (_fs.existsSync(file)) {
+            var rows = _fs.readFileSync(file,{"encoding" : "utf-8"}).split("\n");
+            for (i in rows) {
+                var val = rows[i].trim().split("=");
+                if (val.length == 2) {
+                    data[val[0].trim()] = val[1].
+                        trim().
+                        replace(/([\"\']?)(\w+)([\"\']?)/,"$2");
+                }
+            }
+        }
+    }
     
     if (typeof data == "object") {
         for (key in data) {
@@ -93,7 +117,7 @@ function SPDbConn (data) {
      * @param   mixed   val     Parametri
      * @returns string
      */
-    this.escape = function(val) {
+    this.escape = function* (val) {
         var result = false;
         
         switch (typeof val) {
@@ -103,7 +127,7 @@ function SPDbConn (data) {
                         
             case "number":
             case "string":
-                result = "'"+_this.escapeString(val.toString())+"'";
+                result = "'"+(yield _this.escapeString(val.toString()))+"'";
                 break;
             
             case "object":
@@ -130,7 +154,7 @@ function SPDbConn (data) {
                                     result = "";
                                 }                            
                                 result += ((result.length > 0) ? ", " : "")+
-                                    _this.escape(val[i]);
+                                    (yield _this.escape(val[i]));
                             }
                         } else {
                             throw "Val is an empty array!";
@@ -167,6 +191,52 @@ function SPDbConn (data) {
     }
     
     /**
+     * Ajaa INSERT kyselyn ja palauttaa insert id:n.
+     *
+     * @param   string  table   Taulu jonne tallennetaan
+     * @param   array   data    Arvot jotka tallennetaan
+     * @returns int
+     */
+    this.insert = function* (table,data) {
+        var sql = yield _this.insertStr(table,data);
+                
+        yield _this.query(sql);
+        
+        return _this.insertId;
+    }
+    
+    /**
+     * Luo INSERT kyselyn SQL - lauseen funktion parametrien
+     * avulla.
+     *
+     * @param   string  table   Taulu jonne tallennetaan
+     * @param   array   data    Arvot jotka tallennetaan
+     * @returns string
+     */
+    this.insertStr = function* (table,data) {
+        if (typeof table != "string" || table.length == 0) {
+            throw "Table name is missing!";
+        }
+        
+        if (typeof data != "object") {
+            throw "Data is not an object!";
+        }
+        
+        var keys = "";
+        var values = "";
+        for (key in data) {
+            keys += ((keys) ? ", ": "")+key;
+            values += ((values) ? ", ": "")+(yield _this.escape(data[key]));
+        }
+        
+        if (!keys) {
+            throw "Data is empty!";
+        }
+                
+        return "INSERT INTO "+table+" ("+keys+") VALUES ("+values+")";
+    }
+    
+    /**
      * Suorittaa SQL kyselyn tietokantaan ja palauttaa kyselyn tulosjoukon.
      *
      * Jos kysely ei palauta tulosjoukkoa palautetaan boolean true.
@@ -189,6 +259,93 @@ function SPDbConn (data) {
     }
     this._query = function* (sql,callback) {
         throw "_query() not implemented!";
+    }
+    
+    /**
+     * Ajaa UPDATE kyselyn ja palauttaa affected rows:n.
+     *
+     * @param   string  table   Taulu jota päivitetään
+     * @param   array   data    Arvot jotka päivitetään
+     * @param   mixed   where   Rajoitusehdot
+     * @param   int     limit   Montako riviä päivitetään
+     * @returns string
+     */
+    this.update = function* (table,data,where,limit) {
+        var sql = yield _this.updateStr(table,data,where,limit);
+        
+        yield _this.query(sql);
+        
+        return _this.affrows;
+    }
+    
+    /**
+     * Luo UPDATE kyselyn SQL - lauseen funktion parametrien
+     * avulla.
+     *
+     * Where ehto käytäytyy seuraavasti:
+     *
+     * Taulukko     = WHERE key=1 AND key2=2...
+     * TRUE         = WHERE 1=1
+     * Numeerinen   = WHERE id='1'
+     * Merkkijono   = WHERE $where
+     * Muu          = Keskeytys
+     *
+     * @param   string  table   Taulu jota päivitetään
+     * @param   array   data    Arvot jotka päivitetään
+     * @param   mixed   where   Rajoitusehdot
+     * @param   int     limit   Montako riviä päivitetään
+     * @returns string
+     */
+    this.updateStr = function* (table,data,where,limit) {
+        if (typeof limit == "undefined") {
+            limit = 1;
+        }
+        
+        if (typeof table != "string" || table.length == 0) {
+            throw "Table name is missing!";
+        }
+        
+        if (typeof data != "object") {
+            throw "Data is not an object!";
+        }
+        
+        if (!/^[0-9]{1,}$/.test(limit)) {
+            throw "Limit is not numeric!";
+        }
+        
+        var columns = "";
+        for (key in data) {
+            columns += ((columns) ? ", " : "");
+            columns += key+"="+(yield _this.escape(data[key]));
+        }
+        
+        var cond = "";
+        if (/^[0-9]{1,}$/.test(where)) {
+            cond = "id="+(yield _this.escape(where));
+        } else if (typeof where == "string") {
+            cond = where;
+        } else if (where === true) {
+            cond = "1=1";
+        } else if (typeof where == "object") {
+            for (key in where) {
+                cond += ((cond) ? " AND " : "");
+                cond += key;
+                
+                if (where[key] === null) {
+                    cond += " IS NULL";
+                } else if (typeof where[key] == "object" && where[key] instanceof Array) {
+                    cond += " IN ("+(yield _this.escape(where[key]))+")";
+                } else {
+                    cond += "="+(yield _this.escape(where[key]));
+                }
+            }
+        }
+        
+        if (!cond) {
+            throw "Where is invalid!";
+        }
+        
+        return "UPDATE "+table+" SET "+columns+" WHERE "+cond+" LIMIT "+limit;
     }
 }
 
