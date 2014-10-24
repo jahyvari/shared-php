@@ -237,6 +237,62 @@ function SPDbConn (data) {
     }
     
     /**
+     * Funktio suorittaa tietoturvallisen SQL kyselyn.
+     *
+     * Kysely on muotoa "SELECT * FROM test WHERE id =:id".
+     *
+     * Parametrit eroitetaan kaksoispisteella ja asetetaan
+     * $params taulukkoon.
+     *
+     * Funktio ajaa lopuksi lauseene query funktion läpi.
+     *
+     * @param   string  sql     SQL lause
+     * @param   array   params  Parametrit (vapaaehtoinen)
+     * @returns mixed
+     */
+    this.preparedQuery = function* (sql,params) {
+        var result = false;
+        
+        if (typeof sql == "string" && sql.length > 0) {
+            sql += " ";
+            
+            if (typeof params == "object" && Object.keys(params).length > 0) {
+                var bind = {};                
+                
+                for (key in params) {
+                    var escaped = key.replace(/([.*+?^${}()|\[\]\/\\])/g,"\\$1");
+                    var regExp = new RegExp("[:]{1}"+escaped+"[\r\n), ]{1}","gm");
+                    var count = 0;
+                    while (match = regExp.exec(sql)) {
+                        bind[match["index"]] = [(match[0].length-1),params[key]];                        
+                        count++;
+                    }
+                    if (count == 0) {
+                        throw "Cannot find key "+key+"!";
+                    }
+                }
+                
+                var replaced = 0;
+                var keys = Object.keys(bind);
+                for (i in keys) {
+                    var pos = parseInt(keys[i]);
+                    var value = yield _this.escape(bind[pos][1]);
+                    
+                    sql = sql.slice(0,(pos-replaced))+
+                        value+
+                        sql.slice((pos+bind[pos][0]-replaced));
+                        
+                    replaced += (bind[pos][0]-value.length);
+                }
+            }
+           
+            result = yield _this.query(sql.slice(0,-1));
+        }
+        
+        return result;
+    }
+    
+    /**
      * Suorittaa SQL kyselyn tietokantaan ja palauttaa kyselyn tulosjoukon.
      *
      * Jos kysely ei palauta tulosjoukkoa palautetaan boolean true.
@@ -434,8 +490,8 @@ function SPMySQL (data) {
                 result = query[0];
             }
         } catch(e) {
-            _this.errno = err.errno;
-            _this.error = err.code;                
+            _this.errno = e.errno;
+            _this.error = e.code;                
         }
                 
         return result;

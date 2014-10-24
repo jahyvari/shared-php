@@ -13,8 +13,10 @@ var SPTestSuite = ts.SPTestSuite;
 var db = new db.SPMySQL();
 
 co(function* (){    
+    console.log(yield db.preparedQuery("SELECT * FROM test WHERE id=:id",{"id" : 79}));
+    
     // Testaa yhteyden avaus
-    var open = yield db.connect();
+    /*var open = yield db.connect();
     SPTestSuite.test("dbconn-1",function (){
         return open;
     },true);
@@ -23,5 +25,5 @@ co(function* (){
     var close = yield db.disconnect();
     SPTestSuite.test("dbconn-2",function (){
         return close;
-    },true);
+    },true);*/
 })();
