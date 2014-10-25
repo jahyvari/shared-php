@@ -143,6 +143,7 @@ function SPDbConn (data) {
                 _this.errno         = 0;
                 _this.error         = "";
                 _this.insertId      = 0;
+                _this.link          = null;
             }
         }
         return result;
