@@ -38,7 +38,7 @@ var run = function() {
         
         process.stdout.write(msg);
 
-        exec("node "+file,function(error,stdout,stderr){            
+        exec("node --harmony "+file,function(error,stdout,stderr){
            var msg = stdout;
            
            // Virhe -> keskeytetään
