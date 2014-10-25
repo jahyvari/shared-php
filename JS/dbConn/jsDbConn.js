@@ -2,6 +2,7 @@ function SPDbConn (data) {
     var _this = this;
     var _fs = require("fs");
     var _path = require("path");
+    var _transactions = [];
         
     // Julkiset attribuutit
     this.affrows        = 0;
@@ -50,6 +51,61 @@ function SPDbConn (data) {
         }
     }
     
+    /**
+     * Aloittaa transaktion.
+     *
+     * @returns bool
+     */
+    this.begin = function* () {
+        var result = false;
+        
+        if (yield _this.connect()) {            
+            if (_transactions.length == 0) {
+                var savepoint = null;
+                var sql = "START TRANSACTION";
+            } else {
+                var savepoint = "SP"+_transactions.length;
+                var sql = "SAVEPOINT "+savepoint;
+            }
+            
+            var query = yield _this.query(sql);
+            if (query !== false) {
+                result = true;
+                _transactions.push(savepoint);
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Päättää transaktion.
+     *
+     * @returns bool
+     */
+    this.commit = function* () {
+        var result = false;
+        
+        if (_transactions.length > 0) {            
+            var savepoint = _transactions.pop();
+            
+            if (savepoint === null) {
+                var sql = "COMMIT";
+            } else {
+                var sql = "RELEASE SAVEPOINT "+savepoint;
+            }
+            
+            var query = yield _this.query(sql);
+            if (query !== false) {
+                result = true;
+            } else {
+                _transactions.push(savepoint);
+            }
+        }
+        
+        return result;
+    }
+            
     /**
      * Yhdistää tietokantaan.
      *
@@ -315,6 +371,34 @@ function SPDbConn (data) {
     }
     this._query = function* (sql,callback) {
         throw "_query() not implemented!";
+    }
+    
+    /**
+     * Peruu transaktion.
+     *
+     * @returns bool
+     */
+    this.rollback = function* () {
+        var result = false;
+        
+        if (_transactions.length > 0) {            
+            var savepoint = _transactions.pop();
+            
+            if (savepoint === null) {
+                var sql = "ROLLBACK";
+            } else {
+                var sql = "ROLLBACK TO SAVEPOINT "+savepoint;
+            }
+            
+            var query = yield _this.query(sql);
+            if (query !== false) {
+                result = true;
+            } else {
+                _transactions.push(savepoint);
+            }
+        }
+        
+        return result;
     }
     
     /**
