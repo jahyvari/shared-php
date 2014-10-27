@@ -571,7 +571,7 @@
          * @param   array   $data   Arvot jotka päivitetään
          * @param   mixed   $where  Rajoitusehdot
          * @param   int     $limit  Montako riviä päivitetään
-         * @return  string
+         * @return  int
          */
         public function update($table,$data,$where,$limit = 1) {
             $sql = $this->updateStr($table,$data,$where,$limit);
