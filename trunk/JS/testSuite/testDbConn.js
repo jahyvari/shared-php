@@ -35,8 +35,8 @@ co(function* (){
     // Tarkasta tallentuiko data oikeasti
     var query = yield db.preparedQuery("SELECT * FROM test WHERE id=:id",{"id" : insertid});
     SPTestSuite.test("dbconn-4",function (){
-        if (query) {
-            return query[0]["key1"];   
+        if (query["resultset"].length > 0) {
+            return query["resultset"][0]["key1"];   
         } else {
             return false;
         }        
@@ -58,8 +58,8 @@ co(function* (){
     // Tarkasta muuttuiko data oikeasti
     var query = yield db.preparedQuery("SELECT * FROM test WHERE id=:id",{"id" : insertid});
     SPTestSuite.test("dbconn-7",function (){
-        if (query) {
-            return query[0]["key1"];   
+        if (query["resultset"].length > 0) {
+            return query["resultset"][0]["key1"];   
         } else {
             return false;
         }        
@@ -74,8 +74,8 @@ co(function* (){
     // Tarkasta menikö rollback oikeasti läpi
     var query = yield db.preparedQuery("SELECT * FROM test WHERE id=:id",{"id" : insertid});
     SPTestSuite.test("dbconn-9",function (){
-        if (query) {
-            return query[0]["key1"];   
+        if (query["resultset"].length > 0) {
+            return query["resultset"][0]["key1"];   
         } else {
             return false;
         }        
@@ -90,12 +90,12 @@ co(function* (){
     // Tarkasta että virheellinen SQL lause ei mene läpi
     var query = yield db.query("SELECT * FROM test2");
     SPTestSuite.test("dbconn-11",function (){
-        return query;   
-    },false);
+        return query["resultset"].length;   
+    },0);
     
     // Tarkasta että edellinen lause palautti virheilmoituksen
     SPTestSuite.test("dbconn-12",function (){
-        return Boolean(db.error.length);   
+        return Boolean(query["error"].length);   
     },true);
     
     // Testaa yhteyden sulkeminen
