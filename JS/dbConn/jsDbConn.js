@@ -5,14 +5,10 @@ function SPDbConn (data) {
     var _transactions = [];
         
     // Julkiset attribuutit
-    this.affrows        = 0;
     this.connected      = false;
     this.connectError   = "";
     this.database       = null;
-    this.errno          = 0;
-    this.error          = "";
     this.host           = null;
-    this.insertId       = 0;
     this.link           = null;
     this.passwd         = null;
     this.port           = null;
@@ -69,7 +65,7 @@ function SPDbConn (data) {
             }
             
             var query = yield _this.query(sql);
-            if (query !== false) {
+            if (query["errno"] == 0) {
                 result = true;
                 _transactions.push(savepoint);
             }
@@ -96,7 +92,7 @@ function SPDbConn (data) {
             }
             
             var query = yield _this.query(sql);
-            if (query !== false) {
+            if (query["errno"] == 0) {
                 result = true;
             } else {
                 _transactions.push(savepoint);
@@ -137,12 +133,8 @@ function SPDbConn (data) {
         if (_this.connected) {
             result = yield _this._disconnect();
             if (result) {
-                _this.affrows       = 0;
                 _this.connected     = false;
                 _this.connectError  = "";                
-                _this.errno         = 0;
-                _this.error         = "";
-                _this.insertId      = 0;
                 _this.link          = null;
             }
         }
@@ -239,7 +231,7 @@ function SPDbConn (data) {
     this.escapeString = function* (val) {
         var result = false;
         if (yield _this.connect()) {
-            result = _this._escapeString(val);
+            result = yield _this._escapeString(val);
         }
         return result;
     }
@@ -257,9 +249,9 @@ function SPDbConn (data) {
     this.insert = function* (table,data) {
         var sql = yield _this.insertStr(table,data);
                 
-        yield _this.query(sql);
+        var query = yield _this.query(sql);
         
-        return _this.insertId;
+        return query["insertId"];
     }
     
     /**
@@ -307,9 +299,7 @@ function SPDbConn (data) {
      * @param   array   params  Parametrit (vapaaehtoinen)
      * @returns mixed
      */
-    this.preparedQuery = function* (sql,params) {
-        var result = false;
-        
+    this.preparedQuery = function* (sql,params) {        
         if (typeof sql == "string" && sql.length > 0) {
             sql += " ";
             
@@ -342,31 +332,40 @@ function SPDbConn (data) {
                     replaced += (bind[pos][0]-value.length);
                 }
             }
-           
-            result = yield _this.query(sql.slice(0,-1));
+            
+            sql = sql.slice(0,-1);
         }
         
-        return result;
+        return yield _this.query(sql);
     }
     
     /**
-     * Suorittaa SQL kyselyn tietokantaan ja palauttaa kyselyn tulosjoukon.
+     * Suorittaa SQL kyselyn tietokantaan ja palauttaa kyselyn tulokset.
      *
-     * Jos kysely ei palauta tulosjoukkoa palautetaan boolean true.
+     * Paluuobjektissa on seuraavat sarakkeet:
+     *
+     * affrows
+     * errno (0 = ei virhettä)
+     * error
+     * insertId
+     * resultset (kyselyn tulosjoukko)
      *
      * @param   string  sql SQL kysely
-     * @returns mixed
+     * @returns object
      */
     this.query = function* (sql) {
-        var result = false;
-        
-        _this.affrows   = 0;        
-        _this.errno     = 0;
-        _this.error     = "";
-        _this.insertId  = 0;
-        
+        var result = {
+            "affrows"   : 0,
+            "errno"     : 0,
+            "error"     : "",
+            "insertId"  : 0,
+            "resultset" : []
+        };       
         if (yield _this.connect()) {
             result = yield _this._query(sql);
+        } else {
+            result["errno"] = -1;
+            result["error"] = _this.connectError;
         }
         return result;
     }
@@ -392,7 +391,7 @@ function SPDbConn (data) {
             }
             
             var query = yield _this.query(sql);
-            if (query !== false) {
+            if (query["errno"] == 0) {
                 result = true;
             } else {
                 _transactions.push(savepoint);
@@ -409,14 +408,14 @@ function SPDbConn (data) {
      * @param   array   data    Arvot jotka päivitetään
      * @param   mixed   where   Rajoitusehdot
      * @param   int     limit   Montako riviä päivitetään
-     * @returns string
+     * @returns int
      */
     this.update = function* (table,data,where,limit) {
         var sql = yield _this.updateStr(table,data,where,limit);
         
-        yield _this.query(sql);
+        var query = yield _this.query(sql);
         
-        return _this.affrows;
+        return query["affrows"];
     }
     
     /**
@@ -495,11 +494,17 @@ function SPMySQL (data) {
     var _mysql = require("mysql");
     
     SPDbConn.call(_this,data);
+    
+    var _connect = function() {
+        return function(callback) {
+            _this.link.getConnection(callback);
+        }
+    }
         
-    this._connect = function* (){
+    this._connect = function* () {
         var result = false;
         
-        _this.link = _mysql.createConnection({
+        _this.link = _mysql.createPool({
             host        : _this.host,
             user        : _this.username,
             password    : _this.passwd,
@@ -508,14 +513,9 @@ function SPMySQL (data) {
             timeout     : _this.timeout
         });
         
-        var connect = function() {
-            return function(callback) {
-                _this.link.connect(callback);
-            }
-        }        
-                
         try {
-            yield connect();
+            var connection = yield _connect();
+            connection.release();
             result = true;
         } catch(e) {
             _this.connectError = e.code;
@@ -524,7 +524,7 @@ function SPMySQL (data) {
         return result;
     }
     
-    this._disconnect = function* (callback) {
+    this._disconnect = function* () {
         var result = false;
         
         var disconnect = function() {
@@ -532,7 +532,7 @@ function SPMySQL (data) {
                 _this.link.end(callback);
             }
         }
-                        
+        
         try {
             yield disconnect();
             result = true;
@@ -543,7 +543,7 @@ function SPMySQL (data) {
         return result;
     }
     
-    this._escapeString = function(val) {
+    this._escapeString = function* (val) {
         var result = _this.link.escape(val);
         if (/^'[\S\s]{1,}'$/.test(result)) {
             result = result.slice(1,-1);
@@ -552,33 +552,49 @@ function SPMySQL (data) {
     }
     
     this._query = function* (sql) {
-        var result = false;
-        
+        var result = {
+            "affrows"   : 0,
+            "errno"     : 0,
+            "error"     : "",
+            "insertId"  : 0,
+            "resultset" : []
+        };        
+        var connection = null;
+         
         var query = function(sql) {
             return function(callback) {
-                _this.link.query(sql,callback);
+                connection.query(sql,callback);
             }
+        }
+        
+        try {
+            connection = yield _connect();
+        } catch(e) {
+            result["errno"] = -1;
+            result["error"] = e.code;
+            return result;
         }
             
         try {
-            var query = yield query(sql);
+            var query = yield query(sql);            
             
             if (/^(delete|insert|replace|update)/i.test(sql.trim())) {
                 if (query[0].hasOwnProperty("affectedRows")) {
-                    _this.affrows = query[0].affectedRows;
+                    result["affrows"] = query[0].affectedRows;
                 }
                 if (query[0].hasOwnProperty("insertId")) {
-                    _this.insertId = query[0].insertId;
+                    result["insertId"] = query[0].insertId;
                 }
-                result = true;
             } else {
-                result = query[0];
+                result["resultset"] = query[0];
             }
         } catch(e) {
-            _this.errno = e.errno;
-            _this.error = e.code;                
+            result["errno"] = e.errno;
+            result["error"] = e.code;                
+        } finally {
+            connection.release();
         }
-                
+        
         return result;
     }
 }
