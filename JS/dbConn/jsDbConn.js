@@ -492,18 +492,19 @@ function SPDbConn (data) {
 function SPMySQL (data) {
     var _this = this;
     var _mysql = require("mysql");
+    var _connection = null;
     
     SPDbConn.call(_this,data);
-    
+        
     var _connect = function() {
         return function(callback) {
             _this.link.getConnection(callback);
         }
     }
-        
+            
     this._connect = function* () {
         var result = false;
-        
+                        
         _this.link = _mysql.createPool({
             host        : _this.host,
             user        : _this.username,
@@ -514,8 +515,7 @@ function SPMySQL (data) {
         });
         
         try {
-            var connection = yield _connect();
-            connection.release();
+            _connection = yield _connect();
             result = true;
         } catch(e) {
             _this.connectError = e.code;
@@ -531,6 +531,11 @@ function SPMySQL (data) {
             return function(callback) {
                 _this.link.end(callback);
             }
+        }
+        
+        if (_connection !== null) {
+            _connection.release();
+            _connection = null;
         }
         
         try {
@@ -559,24 +564,25 @@ function SPMySQL (data) {
             "insertId"  : 0,
             "resultset" : []
         };        
-        var connection = null;
          
         var query = function(sql) {
             return function(callback) {
-                connection.query(sql,callback);
+                _connection.query(sql,callback);
             }
         }
         
-        try {
-            connection = yield _connect();
-        } catch(e) {
-            result["errno"] = -1;
-            result["error"] = e.code;
-            return result;
+        if (_connection === null) {
+            try {
+                _connection = yield _connect();
+            } catch(e) {
+                result["errno"] = -1;
+                result["error"] = e.code;
+                return result;
+            }
         }
             
         try {
-            var query = yield query(sql);            
+            var query = yield query(sql);
             
             if (/^(delete|insert|replace|update)/i.test(sql.trim())) {
                 if (query[0].hasOwnProperty("affectedRows")) {
@@ -591,8 +597,6 @@ function SPMySQL (data) {
         } catch(e) {
             result["errno"] = e.errno;
             result["error"] = e.code;                
-        } finally {
-            connection.release();
         }
         
         return result;
