@@ -12,6 +12,7 @@
             "connected" => false,
             "database"  => null,
             "host"      => null,
+            "lastsql"   => null,
             "link"      => null,
             "passwd"    => null,
             "port"      => null,
@@ -204,6 +205,7 @@
                 $result = $this->_disconnect();
                 if ($result) {
                     $this->connected = false;
+                    $this->lastsql = null;
                     $this->link = null;
                 }
             }
@@ -659,6 +661,8 @@
          */
         public function query($sql) {
             $result = false;
+            
+            $this->lastsql = $sql;
             
             if ($this->connect()) {
                 $result = $this->_query($sql);
