@@ -268,7 +268,7 @@
             if (is_null($value)) {
                 $result = "NULL";
             } else if (is_bool($value)) {
-                $result = (($result) ? "1" : "0");
+                $result = (($value) ? "1" : "0");
             } else if (is_array($value)) {
                 if (!empty($value)) {
                     $result = "";                    
