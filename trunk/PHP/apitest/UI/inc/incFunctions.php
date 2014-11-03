@@ -49,7 +49,7 @@
         
         # Lisätään sessionid mukaan kutsuun
         if (isset($_SESSION["sessionid"])) {
-            $opts["http"]["header"] = "x-sessionid: ".
+            $opts["http"]["header"] .= "\nx-sessionid: ".
                 $_SESSION["sessionid"];
         }
         
