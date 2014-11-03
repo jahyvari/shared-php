@@ -97,4 +97,8 @@
         protected function _query($sql) {
             return mysqli_query($this->link,$sql);
         }
+        
+        protected function _setCharset($charset) {
+            return mysqli_set_charset($this->link,$charset);
+        }
     }

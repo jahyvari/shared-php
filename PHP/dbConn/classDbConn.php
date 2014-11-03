@@ -9,6 +9,7 @@
         const FETCH_NUM     = null;
         
         private $_data = array(
+            "charset"   => null,
             "connected" => false,
             "database"  => null,
             "host"      => null,
@@ -146,6 +147,9 @@
                 $result = $this->_connect();
                 if ($result) {
                     $this->connected = true;
+                    if ($this->charset) {
+                        $this->setCharset($this->charset);
+                    }                    
                 }
             } else {
                 $result = true;
@@ -153,7 +157,7 @@
             
             return $result;
         }
-        protected abstract function _connect();
+        protected abstract function _connect();        
         
         /**
          * Palauttaa yhteyden avauksen aiheuttaman virhekoodin.
@@ -517,6 +521,25 @@
         }
         
         /**
+         * Suorittaa SQL - kyselyn.
+         *
+         * @param   string  $sql    SQL - kysely
+         * @return  mixed
+         */
+        public function query($sql) {
+            $result = false;
+            
+            $this->lastsql = $sql;
+            
+            if ($this->connect()) {
+                $result = $this->_query($sql);
+            }
+            
+            return $result;    
+        }
+        protected abstract function _query($sql);
+        
+        /**
          * Hakee tulosjoukon halutulta riviltä halutun sarakkeen arvon.
          * Kts. http://php.net/manual/en/function.mysql-result.php
          *
@@ -532,6 +555,33 @@
             $row = $this->fetch($query,$class::FETCH_BOTH,$offset);
             if (is_array($row) && array_key_exists($field,$row)) {
                 $result = $row[$field];
+            }
+            
+            return $result;
+        }
+        
+        /**
+         * Peruu transaktion.
+         *
+         * @return bool
+         */
+        public function rollback() {
+            $result = false;
+            
+            if (!empty($this->_transactions)) {
+                $savepoint = array_pop($this->_transactions);
+                
+                if (empty($savepoint)) {
+                    $sql = "ROLLBACK";
+                } else {
+                    $sql = "ROLLBACK TO SAVEPOINT $savepoint";
+                }
+                
+                $result = $this->query($sql);
+                                
+                if (!$result) {
+                    $this->_transactions[] = $savepoint;
+                }
             }
             
             return $result;
@@ -565,6 +615,22 @@
             }
             $this->freeResult($query);
         }
+        
+        /**
+         * Asettaa yhteydessä käytetyn merkistökoodauksen.
+         *
+         * @return  bool
+         */
+        public function setCharset($charset) {
+            $result = false;
+            
+            if ($this->connect()) {
+                $result = $this->_setCharset($charset);
+            }
+            
+            return $result;
+        }
+        protected abstract function _setCharset($charset);
         
         /**
          * Ajaa UPDATE kyselyn ja palauttaa affected rows:n.
@@ -651,51 +717,5 @@
             $sql = "UPDATE $table SET $columns WHERE $cond LIMIT $limit";
             
             return $sql;
-        }
-        
-        /**
-         * Suorittaa SQL - kyselyn.
-         *
-         * @param   string  $sql    SQL - kysely
-         * @return  mixed
-         */
-        public function query($sql) {
-            $result = false;
-            
-            $this->lastsql = $sql;
-            
-            if ($this->connect()) {
-                $result = $this->_query($sql);
-            }
-            
-            return $result;    
-        }
-        protected abstract function _query($sql);
-        
-        /**
-         * Peruu transaktion.
-         *
-         * @return bool
-         */
-        public function rollback() {
-            $result = false;
-            
-            if (!empty($this->_transactions)) {
-                $savepoint = array_pop($this->_transactions);
-                
-                if (empty($savepoint)) {
-                    $sql = "ROLLBACK";
-                } else {
-                    $sql = "ROLLBACK TO SAVEPOINT $savepoint";
-                }
-                
-                $result = $this->query($sql);
-                                
-                if (!$result) {
-                    $this->_transactions[] = $savepoint;
-                }
-            }
-            
-            return $result;
         }
     }
