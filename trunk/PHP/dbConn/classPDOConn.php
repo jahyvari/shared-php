@@ -42,7 +42,7 @@
                 # Muodostetaan DSN
                 switch ($this->_driver) {
                     case "mysql": # MySQL
-                        $dsn = "mysql:dbname={$this->database};host={$this->host}";
+                        $dsn = "mysql:dbname={$this->database};host={$this->host}";                        
                         break;
                     
                     case "pgsql": # PgSQL
@@ -55,7 +55,12 @@
                     
                     default:
                         throw new Exception("Invalid driver {$this->_driver}");
-                }                
+                }
+                
+                # Aseta merkistökoodaus
+                if ($this->charset) {
+                    $dsn .= ";charset=".$this->charset;
+                }
                 
                 $this->link = new PDO($dsn,$this->username,$this->passwd,$options);                
                 $result = true;
@@ -175,5 +180,10 @@
             }
             
             return $query;
+        }
+        
+        protected function _setCharset($charset) {
+            # PDO:ssa ei ole tähän funktiota
+            return false;
         }
     }

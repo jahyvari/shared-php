@@ -140,8 +140,16 @@
             return self::_getConn()->preparedQuery($sql,$params);
         }
         
+        public static function query($sql) {
+            return self::_getConn()->query($sql);
+        }
+        
         public static function result($query,$offset,$field = 0) {
             return self::_getConn()->result($query,$offset,$field);
+        }
+        
+        public static function rollback() {
+            return self::_getConn()->rollback();
         }
         
         public static function select($sql,$params = array(),$resulttype = null) {
@@ -152,19 +160,15 @@
             return self::_getConn()->__set($name,$value);
         }
         
+        public static function setCharset($charset) {
+            return self::_getConn()->setCharset($charset);
+        }
+        
         public static function update($table,$data,$where,$limit = 1) {
             return self::_getConn()->update($table,$data,$where,$limit);
         }
         
         public static function updateStr($table,$data,$where,$limit = 1) {
             return self::_getConn()->updateStr($table,$data,$where,$limit);
-        }
-        
-        public static function query($sql) {
-            return self::_getConn()->query($sql);
-        }
-        
-        public static function rollback() {
-            return self::_getConn()->rollback();
         }
     }
