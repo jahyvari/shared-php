@@ -310,6 +310,7 @@ function SPDbConn (data) {
                     var escaped = key.replace(/([.*+?^${}()|\[\]\/\\])/g,"\\$1");
                     var regExp = new RegExp("[:]{1}"+escaped+"[\r\n), ]{1}","gm");
                     var count = 0;
+                    var match = null;
                     while (match = regExp.exec(sql)) {
                         bind[match["index"]] = [(match[0].length-1),params[key]];                        
                         count++;
