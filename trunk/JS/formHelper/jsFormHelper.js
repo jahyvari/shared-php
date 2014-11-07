@@ -232,7 +232,7 @@ var SPFormHelper = new function() {
                         }
                     }                                        
                     
-                    tempAttr["key"] = key;
+                    tempAttr["value"] = key;
                     
                     var attrStr = _attrToStr(tempAttr);
                     
