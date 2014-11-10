@@ -112,6 +112,18 @@
         }
         
         /**
+         * Luo input/file elementin.
+         *
+         * @param   string  $name   Name attribuutti
+         * @param   string  $value  Value attribuutti
+         * @param   array   $attr   Muut attribuutit (esim. class tai id)
+         * @return  string
+         */
+        public static function file($name,$value,$attr = array()) {
+            return self::input($name,$value,$attr,"file");
+        }
+        
+        /**
          * Luo input/hidden elementin.
          *
          * @param   string  $name   Name attribuutti
@@ -121,6 +133,18 @@
          */
         public static function hidden($name,$value,$attr = array()) {
             return self::input($name,$value,$attr,"hidden");
+        }
+        
+        /**
+         * Luo input/image elementin.
+         *
+         * @param   string  $name   Name attribuutti
+         * @param   string  $value  Value attribuutti
+         * @param   array   $attr   Muut attribuutit (esim. class tai id)
+         * @return  string
+         */
+        public static function image($name,$value,$attr = array()) {
+            return self::input($name,$value,$attr,"image");
         }
         
         /**
@@ -256,6 +280,18 @@
             }
             
             return self::input($name,$value,$attr,"radio");
+        }
+        
+        /**
+         * Luo input/range elementin.
+         *
+         * @param   string  $name   Name attribuutti
+         * @param   string  $value  Value attribuutti
+         * @param   array   $attr   Muut attribuutit (esim. class tai id)
+         * @return  string
+         */
+        public static function range($name,$value,$attr = array()) {
+            return self::input($name,$value,$attr,"range");
         }
         
         /**

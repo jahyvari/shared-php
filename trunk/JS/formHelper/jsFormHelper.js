@@ -129,6 +129,18 @@ var SPFormHelper = new function() {
     }
     
     /**
+     * Luo input/file elementin.
+     *
+     * @param   string  name    Name attribuutti
+     * @param   string  value   Value attribuutti
+     * @param   object  attr    Muut attribuutit (esim. class tai id)
+     * @returns string
+     */
+    this.file = function(name,value,attr) {
+        return _this.input(name,value,attr,"file");
+    }
+    
+    /**
      * Luo input/hidden elementin.
      *
      * @param   string  name    Name attribuutti
@@ -138,6 +150,18 @@ var SPFormHelper = new function() {
      */
     this.hidden = function(name,value,attr) {
         return _this.input(name,value,attr,"hidden");
+    }
+    
+    /**
+     * Luo input/image elementin.
+     *
+     * @param   string  name    Name attribuutti
+     * @param   string  value   Value attribuutti
+     * @param   object  attr    Muut attribuutit (esim. class tai id)
+     * @returns string
+     */
+    this.image = function(name,value,attr) {
+        return _this.input(name,value,attr,"image");
     }
     
     /**
@@ -305,6 +329,18 @@ var SPFormHelper = new function() {
         }
         
         return _this.input(name,value,attr,"radio");
+    }
+    
+    /**
+     * Luo input/range elementin.
+     *
+     * @param   string  name    Name attribuutti
+     * @param   string  value   Value attribuutti
+     * @param   object  attr    Muut attribuutit (esim. class tai id)
+     * @returns string
+     */
+    this.range = function(name,value,attr) {
+        return _this.input(name,value,attr,"range");
     }
     
     /**
