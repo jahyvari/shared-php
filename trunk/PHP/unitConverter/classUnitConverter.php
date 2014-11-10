@@ -15,7 +15,7 @@
         /**
          * Muuttaa senttimetrit jaloiksi.
          * 
-         * @param   int $cm Pituus senttimetreinä
+         * @param   double  $cm     Pituus senttimetreinä
          * @return  mixed
          */                
         public static function cmToFoot($cm) {
@@ -31,7 +31,7 @@
         /**
          * Muuttaa senttimetrit tuumiksi.
          * 
-         * @param   int $cm Pituus senttimetreinä
+         * @param   double  $cm     Pituus senttimetreinä
          * @return  mixed
          */
         public static function cmToInch($cm) {
@@ -47,7 +47,7 @@
         /**
          * Muuttaa jalat senttimetreiksi.
          * 
-         * @param   int $foot   Pituus jalkoina 
+         * @param   double  $foot   Pituus jalkoina 
          * @return  mixed
          */
         public static function footToCm($foot) {
@@ -63,7 +63,7 @@
         /**
          * Muuttaa jalat tuumiksi.
          * 
-         * @param   int $foot   Pituus jalkoina 
+         * @param   double  $foot   Pituus jalkoina 
          * @return  mixed
          */
         public static function footToInch($foot) {
@@ -79,7 +79,7 @@
         /**
          * Muuttaa tuumat centtimetreiksi.
          * 
-         * @param   int $inch   Pituus tuumina 
+         * @param   double  $inch   Pituus tuumina 
          * @return  mixed
          */
         public static function inchToCm($inch) {
@@ -95,7 +95,7 @@
         /**
          * Muuttaa tuumat jaloiksi.
          * 
-         * @param   int $inch   Pituus tuumina 
+         * @param   double  $inch   Pituus tuumina 
          * @return  mixed
          */
         public static function inchToFoot($inch) {
@@ -111,7 +111,7 @@
         /**
          * Muuttaa kilogrammat paunoiksi.
          *
-         * @param   int $kg Paino kilogrammoina
+         * @param   double  $kg     Paino kilogrammoina
          * @return  mixed
          */
         public static function kgToLb($kg) {
@@ -127,7 +127,7 @@
         /**
          * Muuttaa kilometrit maileiksi.
          *
-         * @param   int $km Pituus kilometreinä
+         * @param   double  $km     Pituus kilometreinä
          * @return  mixed
          */
         public static function kmToMile($km) {
@@ -143,7 +143,7 @@
         /**
          * Muuttaa paunat kilogrammoiksi
          *
-         * @param   int $lb Paino paunoina
+         * @param   double  $lb     Paino paunoina
          * @return  mixed
          */
         public static function lbToKg($lb) {
@@ -159,7 +159,7 @@
         /**
          * Muuttaa mailit kilometreiksi
          *
-         * @param   int $mile   Pituus maileina
+         * @param   double  $mile   Pituus maileina
          * @return  mixed
          */
         public static function mileToKm($mile) {
