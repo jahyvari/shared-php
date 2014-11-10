@@ -117,6 +117,18 @@ var SPFormHelper = new function() {
     }
     
     /**
+     * Luo input/email elementin.
+     *
+     * @param   string  name    Name attribuutti
+     * @param   string  value   Value attribuutti
+     * @param   object  attr    Muut attribuutit (esim. class tai id)
+     * @returns string
+     */
+    this.email = function(name,value,attr) {
+        return _this.input(name,value,attr,"email");
+    }
+    
+    /**
      * Luo input/hidden elementin.
      *
      * @param   string  name    Name attribuutti
@@ -184,6 +196,18 @@ var SPFormHelper = new function() {
     }
     
     /**
+     * Luo input/number elementin.
+     *
+     * @param   string  name    Name attribuutti
+     * @param   string  value   Value attribuutti
+     * @param   object  attr    Muut attribuutit (esim. class tai id)
+     * @returns string
+     */
+    this.number = function(name,value,attr) {
+        return _this.input(name,value,attr,"number");
+    }
+    
+    /**
      * Luo option elementit valintalistaa varten.
      *
      * @param   object  values      Option elementtien key/value parit
@@ -248,6 +272,18 @@ var SPFormHelper = new function() {
         }
         
         return html;
+    }
+    
+    /**
+     * Luo input/password elementin.
+     *
+     * @param   string  name    Name attribuutti
+     * @param   string  value   Value attribuutti
+     * @param   object  attr    Muut attribuutit (esim. class tai id)
+     * @returns string
+     */
+    this.password = function(name,value,attr) {
+        return _this.input(name,value,attr,"password");
     }
     
     /**

@@ -100,6 +100,18 @@
         }
         
         /**
+         * Luo input/email elementin.
+         *
+         * @param   string  $name   Name attribuutti
+         * @param   string  $value  Value attribuutti
+         * @param   array   $attr   Muut attribuutit (esim. class tai id)
+         * @return  string
+         */
+        public static function email($name,$value,$attr = array()) {
+            return self::input($name,$value,$attr,"email");
+        }
+        
+        /**
          * Luo input/hidden elementin.
          *
          * @param   string  $name   Name attribuutti
@@ -157,6 +169,18 @@
         }
         
         /**
+         * Luo input/number elementin.
+         *
+         * @param   string  $name   Name attribuutti
+         * @param   string  $value  Value attribuutti
+         * @param   array   $attr   Muut attribuutit (esim. class tai id)
+         * @return  string
+         */
+        public static function number($name,$value,$attr = array()) {
+            return self::input($name,$value,$attr,"number");
+        }
+        
+        /**
          * Luo option elementit valintalistaa varten.
          *
          * @param   array   $values     Option elementtien key/value parit
@@ -201,6 +225,18 @@
             }
             
             return $html;
+        }
+        
+        /**
+         * Luo input/password elementin.
+         *
+         * @param   string  $name   Name attribuutti
+         * @param   string  $value  Value attribuutti
+         * @param   array   $attr   Muut attribuutit (esim. class tai id)
+         * @return  string
+         */
+        public static function password($name,$value,$attr = array()) {
+            return self::input($name,$value,$attr,"password");
         }
         
         /**
