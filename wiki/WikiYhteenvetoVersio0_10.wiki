@@ -1,4 +1,4 @@
-#summary Projektin yhteenveto
+#summary Version 0.10 yhteenveto
 
 = SharedPHP =
 
