@@ -7,7 +7,7 @@ SharedPHP on kokoelma !JavaScript ja PHP luokkia eri käyttötarkoituksiin.
 
 = Kansiorakenne =
 
-*JS*
+*JS (!JavaScript)* 
  * checkDigits
  - Sisältää funktioita tarkastusmerkkien laskentaa varten.
  * dbConn
@@ -19,7 +19,7 @@ SharedPHP on kokoelma !JavaScript ja PHP luokkia eri käyttötarkoituksiin.
  * unitConverter
  - Sisältää funktioita yksikkömuutosten tekoa varten.
 
-PHP
+*PHP* 
  * checkDigits
  - Sisältää funktioita tarkastusmerkkien laskentaa varten.
  * dbConn
