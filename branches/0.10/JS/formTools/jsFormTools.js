@@ -1,4 +1,4 @@
-var SPFormHelper = new function() {
+var SPFormTools = new function() {
     var _this = this;
     
     // True = funktiot kaiuttavat elementit suoraan ruudulle (document.write)

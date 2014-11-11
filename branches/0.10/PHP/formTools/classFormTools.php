@@ -1,7 +1,7 @@
 <?php
     namespace SharedPHP;
     
-    class FormHelper {
+    class FormTools {
         # True = funktiot kaiuttavat elementit suoraan ruudulle
         public static $autoecho     = true;
         
