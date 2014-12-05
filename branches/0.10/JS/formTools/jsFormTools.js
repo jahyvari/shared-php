@@ -234,6 +234,54 @@ var SPFormTools = new function() {
     /**
      * Luo option elementit valintalistaa varten.
      *
+     * Values attribuutin tuetut muodot:
+     *
+     * Vaihtoehto 1 (optgroup):
+     * [
+     *   {
+     *     '_key': 'level1', '_value': [{'_key': 1, '_value': 'arvo1'},...]
+     *   },
+     *   {
+     *     '_key': 'level2', '_value': [{'_key': 2, '_value': 'arvo2'},...]
+     *   }
+     * ]
+     * -----
+     *
+     * Vaihtoehto 2 (optgroup):
+     * [
+     *   {
+     *     '_key': 'level1', '_value': {1: 'arvo1',...}
+     *   },
+     *   {
+     *     '_key': 'level2', '_value': {2: 'arvo2',...}
+     *   }
+     * ]
+     * -----
+     * 
+     * Vaihtoehto 3 (optgroup):
+     * {
+     *   'level1': [{'_key': 1, '_value': 'arvo1'},...]
+     *   'level2': [{'_key': 2, '_value': 'arvo2'},...]
+     * }
+     * -----
+     * 
+     * Vaihtoehto 4 (optgroup):
+     * {
+     *   'level1': {1: 'arvo1', 2: 'arvo2',...},
+     *   'level2': {3: 'arvo3', 4: 'arvo4',...},
+     * }
+     * -----
+     * 
+     * Vaihtoehto 5:
+     *
+     * [{'_key': 1, '_value': 'arvo1'},...]
+     * -----
+     * 
+     * Vaihtoehto 6:
+     *
+     * {1: 'arvo1', 2: 'arvo2',...}
+     * ------
+     * 
      * @param   object  values      Option elementtien key/value parit
      * @param   object  attr        Muut attribuutit
      * @param   mixed   selected    Valitut elementit, voi olla taulukko tai yksittäinen arvo
@@ -255,8 +303,17 @@ var SPFormTools = new function() {
         var html = "";
         
         if (typeof values == "object") {
-            for (var key in values) {
-                var value = values[key];
+            for (var x in values) {
+                var row = values[x];
+                
+                // Rivi on objekti
+                if (typeof row == "object" && row.hasOwnProperty("_key")) {
+                    var key = row["_key"];
+                    var value = row["_value"];
+                } else { // x = key ja row = value
+                    var key = x;
+                    var value = row;
+                }
                 
                 if (typeof value == "object") {
                     html += "<optgroup label=\""+_htmlescape(key)+"\">"+
@@ -264,8 +321,8 @@ var SPFormTools = new function() {
                         "</optgroup>";
                 } else {
                     var tempAttr = {};
-                    for (var _key in attr) {
-                        tempAttr[_key] = attr[_key];
+                    for (var y in attr) {
+                        tempAttr[y] = attr[y];
                     }
                     
                     if (typeof selected != "undefined") {
