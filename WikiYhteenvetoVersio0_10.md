@@ -1,0 +1,30 @@
+# SharedPHP #
+
+SharedPHP on kokoelma JavaScript ja PHP luokkia eri käyttötarkoituksiin.
+
+
+# Kansiorakenne #
+
+**JS (JavaScript)**
+  * checkDigits
+> - Sisältää funktioita tarkastusmerkkien laskentaa varten.
+  * dbConn
+> - Sisältää tietokantaluokan Node.js:ää varten. Tukee tällähetkellä vain MySQL tietokantoja. Vaatii Node.js:n moduulit co ja mysql.
+  * formTools
+> - Sisältää funktioita lomakkeiden elementtien luomista varten (mm. button ja checkbox).
+  * testSuite
+> - Sisältää testiluokan yksikkötestausta varten. Kansiossa on myös projektin testitapaukset. Testitapaukset vaativat Node.js:n. Testitietokannan luontilauseke on kansiossa "PHP/testSuite/SQL".
+  * unitConverter
+> - Sisältää funktioita yksikkömuutosten tekoa varten.
+
+**PHP**
+  * checkDigits
+> - Sisältää funktioita tarkastusmerkkien laskentaa varten.
+  * dbConn
+> - Sisältää tietokantaluokan SQLite, PostgreSQL ja MySQL tietokantoja varten.
+  * formTools
+> - Sisältää funktioita lomakkeiden elementtien luomista varten (mm. button ja checkbox).
+  * testSuite
+> - Sisältää testiluokan yksikkötestausta varten. Kansiossa on myös projektin testitapaukset.
+  * unitConverter
+> - Sisältää funktioita yksikkömuutosten tekoa varten.
